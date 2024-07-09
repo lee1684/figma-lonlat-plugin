@@ -24,7 +24,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 }) => {
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
-  const currentZoomRef = useRef<number>(12);
+  const currentZoomRef = useRef<number>(14);
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
