@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import MapComponent from './component/Map';
 import FileUploader from './component/FileUploader';
 import { Node } from './types';
+import { nodesToCSV, downloadCSV } from './utils/lonLat';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -26,9 +27,17 @@ const App: React.FC = () => {
     setCenter(newCenter);
   };
 
+  const handleDownloadCSV = () => {
+    const csv = nodesToCSV(nodes, center);
+    downloadCSV(csv, 'lonlat.csv');
+  };
+
   return (
     <>
       <FileUploader onNodeParsed={handleNodeParsed} />
+      <button type="button" onClick={handleDownloadCSV}>
+        Download lonlat
+      </button>
       <MapComponent
         nodes={nodes}
         center={center}
