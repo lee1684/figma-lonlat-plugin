@@ -4,11 +4,7 @@ import { Geometry, Point } from 'ol/geom';
 import { Vector as VectorSource } from 'ol/source';
 
 import { getCenter, getHeight, getWidth } from 'ol/extent';
-import {
-  never,
-  platformModifierKeyOnly,
-  primaryAction,
-} from 'ol/events/condition';
+import { never, primaryAction } from 'ol/events/condition';
 
 export const addModifyInteraction = (
   map: Map,
@@ -16,8 +12,7 @@ export const addModifyInteraction = (
 ) => {
   const modify = new Modify({
     source: vectorSource,
-    condition: (event) =>
-      primaryAction(event) && !platformModifierKeyOnly(event),
+    condition: (event) => primaryAction(event),
     deleteCondition: never,
     insertVertexCondition: never,
     style: (feature, resolution) => {
