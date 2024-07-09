@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
@@ -25,6 +25,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const currentZoomRef = useRef<number>(12);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     if (!mapElement.current) {
@@ -62,9 +63,21 @@ const MapComponent: React.FC<MapComponentProps> = ({
       currentZoomRef.current = map.getView().getZoom();
     });
 
+    const handleMouseDown = () => setIsDragging(true);
+    const handleMouseUp = () => setIsDragging(false);
+
+    mapElement.current.addEventListener('mousedown', handleMouseDown);
+    mapElement.current.addEventListener('mouseup', handleMouseUp);
+
     mapRef.current = map;
 
-    return () => map.setTarget(undefined);
+    return () => {
+      map.setTarget(undefined);
+      if (mapElement.current) {
+        mapElement.current.removeEventListener('mousedown', handleMouseDown);
+        mapElement.current.removeEventListener('mouseup', handleMouseUp);
+      }
+    };
   }, [onCenterChange]);
 
   useEffect(() => {
@@ -93,7 +106,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   }, [center, nodes]);
 
-  return <div ref={mapElement} style={{ width: '100%', height: '100%' }} />;
+  return (
+    <div
+      ref={mapElement}
+      style={{
+        width: '100%',
+        height: '100%',
+        cursor: isDragging ? 'grabbing' : 'crosshair',
+      }}
+    />
+  );
 };
 
 export default MapComponent;
