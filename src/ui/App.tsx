@@ -33,17 +33,42 @@ const App: React.FC = () => {
   };
 
   return (
-    <>
-      <FileUploader onNodeParsed={handleNodeParsed} />
-      <button type="button" onClick={handleDownloadCSV}>
-        Download lonlat
-      </button>
-      <MapComponent
-        nodes={nodes}
-        center={center}
-        onCenterChange={handleCenterChange}
-      />
-    </>
+    <div
+      style={{
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <FileUploader onNodeParsed={handleNodeParsed} />
+        <button
+          type="button"
+          onClick={handleDownloadCSV}
+          style={{
+            margin: '10px',
+            padding: '10px',
+          }}
+          disabled={nodes.length === 0}
+        >
+          Download lonlat
+        </button>
+      </div>
+      <div style={{ flex: 1 }}>
+        <MapComponent
+          nodes={nodes}
+          center={center}
+          onCenterChange={handleCenterChange}
+        />
+      </div>
+    </div>
   );
 };
 
