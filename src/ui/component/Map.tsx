@@ -87,14 +87,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
       view.setCenter(fromLonLat(center));
       view.setZoom(currentZoom);
 
+      const vectorLayer = mapRef.current
+        .getLayers()
+        .getArray()[1] as VectorLayer<Feature>;
+      const vectorSource = vectorLayer.getSource() as VectorSource;
+      vectorSource.clear();
+
       if (nodes.length > 0) {
-        const vectorLayer = mapRef.current
-          .getLayers()
-          .getArray()[1] as VectorLayer<Feature>;
-        const vectorSource = vectorLayer.getSource() as VectorSource;
-        vectorSource.clear();
-        const polygon = createPolygon(nodes, center);
-        vectorSource.addFeatures(polygon);
+        const polygons = createPolygon(nodes, center);
+        vectorSource.addFeatures(polygons);
         const extent = vectorSource.getExtent();
         if (extent && extent[0] !== extent[2] && extent[1] !== extent[3]) {
           const currentCenter = view.getCenter();

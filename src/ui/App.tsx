@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import MapComponent from './component/Map';
 import FileUploader from './component/FileUploader';
 import { Node } from './types';
@@ -7,6 +7,7 @@ import { nodesToCSV, downloadCSV } from './utils/lonLat';
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [center, setCenter] = useState<[number, number]>([126.978, 37.5665]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-nodes' } }, '*');
@@ -32,6 +33,13 @@ const App: React.FC = () => {
     downloadCSV(csv, 'lonlat.csv');
   };
 
+  const handleClearPolygons = () => {
+    setNodes([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div
       style={{
@@ -48,7 +56,10 @@ const App: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <FileUploader onNodeParsed={handleNodeParsed} />
+        <FileUploader
+          onNodeParsed={handleNodeParsed}
+          fileInputRef={fileInputRef}
+        />
         <button
           type="button"
           onClick={handleDownloadCSV}
@@ -58,7 +69,18 @@ const App: React.FC = () => {
           }}
           disabled={nodes.length === 0}
         >
-          Download lonlat
+          위경도 좌표 다운로드
+        </button>
+        <button
+          type="button"
+          onClick={handleClearPolygons}
+          style={{
+            margin: '10px',
+            padding: '10px',
+          }}
+          disabled={nodes.length === 0}
+        >
+          폴리곤 초기화
         </button>
       </div>
       <div style={{ flex: 1 }}>
