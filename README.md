@@ -1,39 +1,25 @@
-# Figma Plugin React Boilerplate
+# Figma Plugin with Map and CSV Integration
 
-react boilerplate for react plugin
+## 프로젝트 개요
 
-## Getting started
+이 프로젝트는 Figma 플러그인으로, 사용자가 Figma에서 선택한 노드 정보를 가져와 지도로 시각화하고 CSV 파일로 저장할 수 있습니다. 사용자는 지도에서 특정 위치를 클릭하여 기준점을 설정하고, CSV 파일을 업로드하여 노드 정보를 추가할 수 있습니다.
 
-1. Create a project based on this boilerplate.
+## 주요 기능
 
-```bash
-$ npx degit https://github.com/hseoy/figma-plugin-react-boilerplate <project name>
-```
+- Figma에서 선택한 노드의 위치와 크기 정보를 가져와 지도에 표시
+- 지도를 클릭하여 기준점 설정
+- CSV 파일 업로드를 통해 노드 정보 추가
+- 노드 정보를 CSV 파일로 다운로드
 
-2. Install the dependencies.
+## 요구 사항
 
-```bash
-$ yarn install
-```
+- Node.js (v14 이상)
+- Figma Desktop App
 
-3. To rebuild it when the files are changed, run `yarn watch`
+## 사용 방법
 
-```bash
-$ yarn watch
-```
-
-4. The plugin is ready to be added to Figma for development.
-
-### Figma for plugin development
-
-1. Open Figma desktop application.
-
-2. Click on your profile icon dropdown in the top right and select `Plugins` from the list
-
-3. Scroll down to the `In development` section and click the plus(+) icon
-
-4. Choose `Import from manifest`
-
-5. Locate the manifest.json in your newly created project and then select Open
-
-6. Now you will be able to use this plugin.
+1. Figma에서 플러그인을 실행합니다.
+2. 지도가 표시된 UI가 나타납니다.
+3. Figma에서 노드를 선택하고 플러그인 UI에서 "Download lonlat" 버튼을 클릭하여 노드 정보를 CSV 파일로 다운로드할 수 있습니다.
+4. 지도에서 특정 위치를 클릭하여 기준점을 설정할 수 있습니다.
+5. "File Uploader"를 사용하여 CSV 파일을 업로드하고 노드 정보를 추가할 수 있습니다.
