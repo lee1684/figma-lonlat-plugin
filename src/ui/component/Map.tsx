@@ -53,6 +53,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
     map.on('click', (event) => {
       event.preventDefault();
+      const feature = map.forEachFeatureAtPixel(event.pixel, (feat) => feat);
+      if (feature) {
+        return;
+      }
       const clickedCoordinate = toLonLat(
         map.getCoordinateFromPixel(event.pixel),
       ) as [number, number];
