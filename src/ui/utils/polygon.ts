@@ -19,20 +19,17 @@ export const createPolygon = (
 ): Feature<Polygon>[] => {
   if (!nodes || nodes.length === 0) return [];
 
-  return nodes.map((node) => {
-    const { x, y, width, height } = node;
-    const topLeft = pixelToLonLat(x, y, center);
-    const topRight = pixelToLonLat(x + width, y, center);
-    const bottomRight = pixelToLonLat(x + width, y + height, center);
-    const bottomLeft = pixelToLonLat(x, y + height, center);
-    const coordinates = [
-      topLeft,
-      topRight,
-      bottomRight,
-      bottomLeft,
-      topLeft,
-    ].map((coord) => fromLonLat(coord));
-    const polygon = new Polygon([coordinates]);
-    return new Feature(polygon);
-  });
+  const node = nodes[0];
+  const { x, y, width, height } = node;
+  const topLeft = pixelToLonLat(x, y, center);
+  const topRight = pixelToLonLat(x + width, y, center);
+  const bottomRight = pixelToLonLat(x + width, y + height, center);
+  const bottomLeft = pixelToLonLat(x, y + height, center);
+  const coordinates = [topLeft, topRight, bottomRight, bottomLeft, topLeft].map(
+    (coord) => fromLonLat(coord),
+  );
+  const polygon = new Polygon([coordinates]);
+  const feature = new Feature(polygon);
+
+  return [feature];
 };
