@@ -2,12 +2,16 @@ import { Node } from '../types';
 import { pixelToLonLat } from './polygon';
 
 export const nodesToCSV = (nodes: Node[], center: [number, number]): string => {
-  const header = 'name,longitude,latitude\n';
+  const header = 'name,x,y,width,height,geometry\n';
   const rows = nodes
     .map((node) => {
-      const { x, y, name } = node;
-      const [longitude, latitude] = pixelToLonLat(x, y, center);
-      return `${name},${longitude},${latitude}`;
+      const { x, y, width, height, name } = node;
+      const topLeft = pixelToLonLat(x, y, center);
+      const topRight = pixelToLonLat(x + width, y, center);
+      const bottomRight = pixelToLonLat(x + width, y + height, center);
+      const bottomLeft = pixelToLonLat(x, y + height, center);
+      const geometry = `POLYGON((${topLeft[0]} ${topLeft[1]}, ${topRight[0]} ${topRight[1]}, ${bottomRight[0]} ${bottomRight[1]}, ${bottomLeft[0]} ${bottomLeft[1]}, ${topLeft[0]} ${topLeft[1]}))`;
+      return `${name},${x},${y},${width},${height},"${geometry}"`;
     })
     .join('\n');
 
