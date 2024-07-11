@@ -22,6 +22,15 @@ const App: React.FC = () => {
 
   const handleNodesParsed = (parsedNode: Node[]) => {
     setNodes(parsedNode);
+    const { geometry } = parsedNode[0];
+    if (geometry) {
+      const polygonTopLeft = geometry
+        .replace('POLYGON((', '')
+        .replace('))', '')
+        .split(',')
+        .map((coord) => coord.trim().split(' ').map(Number))[0];
+      setCenter([polygonTopLeft[0], polygonTopLeft[1]]);
+    }
   };
 
   const handleCenterChange = (newCenter: [number, number]) => {
