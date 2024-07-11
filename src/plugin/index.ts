@@ -13,6 +13,8 @@ const getAllNodes = (node) => {
       width: collectNode.width,
       height: collectNode.height,
       type: collectNode.type,
+      rotation: collectNode.rotation,
+      cornerRadius: collectNode.cornerRadius,
     });
     if ('children' in collectNode) {
       (collectNode.children as Array<Node>).forEach((child) =>
