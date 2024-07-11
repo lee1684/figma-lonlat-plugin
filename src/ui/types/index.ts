@@ -7,4 +7,8 @@ export interface Node {
   height: number;
   type: string;
   children?: Array<Node>;
+  geometry?: string;
+  rotation?: number;
+  cornerRadius?: number;
+  depth?: number;
 }
