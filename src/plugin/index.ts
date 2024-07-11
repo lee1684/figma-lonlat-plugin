@@ -5,7 +5,7 @@ figma.showUI(__html__, { width: 1500, height: 600 });
 const getAllNodes = (node) => {
   const nodes = [];
   const collectNodes = (collectNode: Node) => {
-    nodes.push({
+    const newNode: Node = {
       id: collectNode.id,
       name: collectNode.name,
       x: collectNode.x,
@@ -15,12 +15,17 @@ const getAllNodes = (node) => {
       type: collectNode.type,
       rotation: collectNode.rotation,
       cornerRadius: collectNode.cornerRadius,
-    });
+      children: undefined,
+    };
+    nodes.push(newNode);
+
     if ('children' in collectNode) {
-      (collectNode.children as Array<Node>).forEach((child) =>
+      newNode.children = (collectNode.children as Array<Node>).map((child) =>
         collectNodes(child),
       );
     }
+
+    return newNode;
   };
   collectNodes(node);
   return nodes;
