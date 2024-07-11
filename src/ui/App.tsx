@@ -20,8 +20,8 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const handleNodeParsed = (parsedNode: Node) => {
-    setNodes((prevNodes) => [...prevNodes, parsedNode]);
+  const handleNodesParsed = (parsedNode: Node[]) => {
+    setNodes(parsedNode);
   };
 
   const handleCenterChange = (newCenter: [number, number]) => {
@@ -57,7 +57,7 @@ const App: React.FC = () => {
         }}
       >
         <FileUploader
-          onNodeParsed={handleNodeParsed}
+          onNodesParsed={handleNodesParsed}
           fileInputRef={fileInputRef}
         />
         <button

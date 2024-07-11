@@ -3,18 +3,18 @@ import { parseCSV } from '../utils/CSVParser';
 import { Node } from '../types';
 
 interface FileUploaderProps {
-  onNodeParsed: (node: Node) => void;
+  onNodesParsed: (node: Node[]) => void;
   fileInputRef: RefObject<HTMLInputElement>;
 }
 
 const FileUploader: React.FC<FileUploaderProps> = ({
-  onNodeParsed,
+  onNodesParsed,
   fileInputRef,
 }) => {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      parseCSV(file).then(onNodeParsed).catch(console.error);
+      parseCSV(file).then(onNodesParsed).catch(console.error);
     }
   };
 
