@@ -1,5 +1,5 @@
 {
-  "name": "openLayer sample plugin",
+  "name": "Figma Mapper Plugin",
   "id": "00000000",
   "api": "1.0.0",
   "main": "dist/plugin.js",
