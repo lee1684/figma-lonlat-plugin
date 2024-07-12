@@ -3,6 +3,7 @@ import MapComponent from './component/Map';
 import FileUploader from './component/FileUploader';
 import { Node } from './types';
 import { nodesToCSV, downloadCSV } from './utils/lonLat';
+import './App.css';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -50,21 +51,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        width: '100vw',
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}
-      >
+    <div className="container">
+      <div className="header">
         <FileUploader
           onNodesParsed={handleNodesParsed}
           fileInputRef={fileInputRef}
@@ -72,10 +60,7 @@ const App: React.FC = () => {
         <button
           type="button"
           onClick={handleDownloadCSV}
-          style={{
-            margin: '10px',
-            padding: '10px',
-          }}
+          className="button"
           disabled={nodes.length === 0}
         >
           위경도 좌표 다운로드
@@ -83,16 +68,13 @@ const App: React.FC = () => {
         <button
           type="button"
           onClick={handleClearPolygons}
-          style={{
-            margin: '10px',
-            padding: '10px',
-          }}
+          className="button"
           disabled={nodes.length === 0}
         >
           폴리곤 초기화
         </button>
       </div>
-      <div style={{ flex: 1 }}>
+      <div className="mapContainer">
         <MapComponent
           nodes={nodes}
           center={center}
