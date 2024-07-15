@@ -13,6 +13,21 @@ export const pixelToLonLat = (
   return [center[0] + x * scale, center[1] - y * scale];
 };
 
+export const getLonLat = (
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  center: [number, number],
+) => {
+  const topLeft = pixelToLonLat(x, y, center);
+  const topRight = pixelToLonLat(x + width, y, center);
+  const bottomRight = pixelToLonLat(x + width, y + height, center);
+  const bottomLeft = pixelToLonLat(x, y + height, center);
+
+  return [topLeft, topRight, bottomRight, bottomLeft, topLeft];
+};
+
 export const createPolygon = (
   nodes: Node[],
   center: [number, number],
@@ -31,12 +46,8 @@ export const createPolygon = (
       .map((coord) => coord.trim().split(' ').map(Number))
       .map(([lon, lat]) => fromLonLat([lon, lat]));
   } else {
-    const topLeft = pixelToLonLat(x, y, center);
-    const topRight = pixelToLonLat(x + width, y, center);
-    const bottomRight = pixelToLonLat(x + width, y + height, center);
-    const bottomLeft = pixelToLonLat(x, y + height, center);
-    coordinates = [topLeft, topRight, bottomRight, bottomLeft, topLeft].map(
-      (coord) => fromLonLat(coord),
+    coordinates = getLonLat(x, y, width, height, center).map((coord) =>
+      fromLonLat(coord),
     );
   }
 
