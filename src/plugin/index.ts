@@ -197,16 +197,46 @@ const postNodesToUI = (nodes) => {
   });
 };
 
+// 위경도 좌표 레이어 추가 함수
+const addHiddenLayer = async (
+  parentNode: FrameNode | ComponentNode | GroupNode,
+  coordinates: [number, number][],
+) => {
+  await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+
+  const hiddenLayer = figma.createFrame();
+  hiddenLayer.visible = false;
+  hiddenLayer.name = 'Coordinates Layer';
+
+  const labels = ['좌상단', '우상단', '우하단', '좌하단'];
+
+  coordinates.forEach((coord, index) => {
+    if (index === coordinates.length - 1) {
+      return;
+    }
+    const text = figma.createText();
+    text.characters = `${labels[index]}: ${coord[0]}, ${coord[1]}`;
+    hiddenLayer.appendChild(text);
+    hiddenLayer.expanded = false;
+  });
+
+  parentNode.appendChild(hiddenLayer);
+};
+
 // 메시지 핸들러 함수
 figma.ui.onmessage = async (msg) => {
-  if (msg.type === 'get-nodes') {
-    const nodes = await getSelectedNodes();
-    postNodesToUI(nodes);
+  const { type, nodes } = msg;
+
+  if (type === 'get-nodes') {
+    const selectedNodes = await getSelectedNodes();
+    postNodesToUI(selectedNodes);
   }
-  if (msg.type === 'create-nodes') {
-    msg.nodes.forEach((node) => {
-      createNodeInFigma(node);
-    });
+  if (type === 'create-nodes') {
+    const [firstNode] = nodes.map(createNodeInFigma);
+
+    if (firstNode && nodes[0].coordinates) {
+      await addHiddenLayer(firstNode, nodes[0].coordinates);
+    }
 
     figma.ui.postMessage({ type: 'hide-loading' });
   }

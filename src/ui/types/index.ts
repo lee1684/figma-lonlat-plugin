@@ -33,4 +33,5 @@ export interface Node {
   fontSize?: number;
   textAlignHorizontal?: 'LEFT' | 'CENTER' | 'RIGHT';
   textAlignVertical?: 'TOP' | 'CENTER' | 'BOTTOM';
+  coordinates?: [number, number][];
 }

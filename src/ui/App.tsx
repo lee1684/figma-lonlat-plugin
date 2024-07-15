@@ -4,6 +4,7 @@ import FileUploader from './component/FileUploader';
 import { Node } from './types';
 import { nodesToCSV, downloadCSV } from './utils/lonLat';
 import './App.css';
+import { getLonLat } from './utils/polygon';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -55,7 +56,21 @@ const App: React.FC = () => {
 
   const handleSendToFigma = () => {
     setLoading(true);
-    parent.postMessage({ pluginMessage: { type: 'create-nodes', nodes } }, '*');
+
+    const [topNode, ...otherNodes] = nodes;
+    const { x, y, width, height } = topNode;
+    const nodesWithCoordinates = [
+      {
+        ...topNode,
+        coordinates: getLonLat(x, y, width, height, center),
+      },
+      ...otherNodes,
+    ];
+
+    parent.postMessage(
+      { pluginMessage: { type: 'create-nodes', nodes: nodesWithCoordinates } },
+      '*',
+    );
   };
 
   return (
