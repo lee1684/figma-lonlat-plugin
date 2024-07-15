@@ -9,6 +9,7 @@ const App: React.FC = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [center, setCenter] = useState<[number, number]>([126.978, 37.5665]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-nodes' } }, '*');
@@ -17,6 +18,8 @@ const App: React.FC = () => {
       const message = event.data.pluginMessage;
       if (message.type === 'nodes') {
         setNodes(message.nodes);
+      } else if (message.type === 'hide-loading') {
+        setLoading(false);
       }
     };
   }, []);
@@ -51,6 +54,7 @@ const App: React.FC = () => {
   };
 
   const handleSendToFigma = () => {
+    setLoading(true);
     parent.postMessage({ pluginMessage: { type: 'create-nodes', nodes } }, '*');
   };
 
@@ -93,6 +97,11 @@ const App: React.FC = () => {
           onCenterChange={handleCenterChange}
         />
       </div>
+      {loading && (
+        <div className="loading-overlay">
+          <div className="spinner" />
+        </div>
+      )}
     </div>
   );
 };
