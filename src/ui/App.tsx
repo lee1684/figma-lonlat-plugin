@@ -50,6 +50,10 @@ const App: React.FC = () => {
     }
   };
 
+  const handleSendToFigma = () => {
+    parent.postMessage({ pluginMessage: { type: 'create-nodes', nodes } }, '*');
+  };
+
   return (
     <div className="container">
       <div className="header">
@@ -72,6 +76,14 @@ const App: React.FC = () => {
           disabled={nodes.length === 0}
         >
           폴리곤 초기화
+        </button>
+        <button
+          type="button"
+          onClick={handleSendToFigma}
+          className="button"
+          disabled={nodes.length === 0}
+        >
+          피그마로 보내기
         </button>
       </div>
       <div className="mapContainer">

@@ -6,7 +6,12 @@ export type NodeType =
   | 'GROUP'
   | 'VECTOR'
   | 'INSTANCE'
-  | 'BOOLEAN_OPERATION';
+  | 'BOOLEAN_OPERATION'
+  | 'CONNECTOR'
+  | 'SLICE'
+  | 'LINE'
+  | 'STAR'
+  | 'COMPONENT';
 
 export interface Node {
   id: number;
