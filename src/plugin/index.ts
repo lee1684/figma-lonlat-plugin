@@ -142,6 +142,11 @@ const createNodeInFigma = (node: Node): SceneNode => {
 
   figmaNode = setCommonProperties(node, figmaNode);
   createdNodes[node.id] = figmaNode;
+
+  if ('expanded' in figmaNode) {
+    figmaNode.expanded = false;
+  }
+
   return figmaNode;
 };
 
