@@ -1,7 +1,7 @@
 import { Feature } from 'ol';
 import { Polygon } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
-import { Node } from '../types';
+import { ExtractedNode } from '../types';
 
 const scale = 0.000001;
 
@@ -29,7 +29,7 @@ export const getLonLat = (
 };
 
 export const createPolygon = (
-  nodes: Node[],
+  nodes: ExtractedNode[],
   center: [number, number],
 ): Feature<Polygon>[] => {
   if (!nodes || nodes.length === 0) return [];

@@ -4,7 +4,10 @@ figma.showUI(__html__, { width: 1500, height: 600 });
 
 const createdNodes: { [key: string]: SceneNode } = {};
 
-const setCommonProperties = (node: Node, figmaNode: SceneNode): SceneNode => {
+const setCommonProperties = (
+  node: ExtractedNode,
+  figmaNode: SceneNode,
+): SceneNode => {
   const updatedNode = figmaNode;
   updatedNode.name = node.name;
   updatedNode.x = node.x;
@@ -45,10 +48,10 @@ const setCommonProperties = (node: Node, figmaNode: SceneNode): SceneNode => {
   return updatedNode;
 };
 
-const createNodeInFigma = (node: Node): SceneNode => {
+const createNodeInFigma = (node: ExtractedNode): SceneNode => {
   const appendChildren = (
     parentNode: FrameNode | ComponentNode | BooleanOperationNode,
-    childrenNodes: Node[],
+    childrenNodes: ExtractedNode[],
   ) => {
     const children = childrenNodes.map(createNodeInFigma);
     children.forEach((childNode) => {

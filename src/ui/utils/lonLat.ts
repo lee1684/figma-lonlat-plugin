@@ -1,8 +1,11 @@
-import { Node } from '../types';
+import { ExtractedNode } from '../types';
 import { pixelToLonLat } from './polygon';
 
-export const nodesToCSV = (nodes: Node[], center: [number, number]): string => {
   const header = 'name,x,y,width,height,rotation,cornerRadius,geometry\n';
+export const nodesToCSV = (
+  nodes: ExtractedNode[],
+  center: [number, number],
+): string => {
   const rows = nodes
     .map((node) => {
       const { x, y, width, height, name, rotation, cornerRadius } = node;

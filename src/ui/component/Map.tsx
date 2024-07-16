@@ -9,10 +9,10 @@ import { createVectorLayer } from '../layers/vectorLayer';
 import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
 import { createPolygon } from '../utils/polygon';
-import { Node } from '../types';
+import { ExtractedNode } from '../types';
 
 interface MapComponentProps {
-  nodes: Node[];
+  nodes: ExtractedNode[];
   center: [number, number];
   onCenterChange: (newCenter: [number, number]) => void;
 }

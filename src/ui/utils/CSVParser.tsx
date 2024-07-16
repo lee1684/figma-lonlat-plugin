@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
-import { Node } from '../types';
+import { ExtractedNode } from '../types';
 
-export const parseCSV = (file: File): Promise<Node[]> => {
+export const parseCSV = (file: File): Promise<ExtractedNode[]> => {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,

@@ -1,9 +1,9 @@
 import React, { ChangeEvent, RefObject } from 'react';
 import { parseCSV } from '../utils/CSVParser';
-import { Node } from '../types';
+import { ExtractedNode } from '../types';
 
 interface FileUploaderProps {
-  onNodesParsed: (node: Node[]) => void;
+  onNodesParsed: (node: ExtractedNode[]) => void;
   fileInputRef: RefObject<HTMLInputElement>;
 }
 
