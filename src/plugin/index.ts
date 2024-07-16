@@ -1,4 +1,4 @@
-import { Node } from '../ui/types';
+import { ExtractedNode } from '../ui/types';
 
 figma.showUI(__html__, { width: 1500, height: 600 });
 
@@ -150,51 +150,22 @@ const createNodeInFigma = (node: Node): SceneNode => {
   return figmaNode;
 };
 
-const getAllNodes = (node) => {
-  const nodes = [];
-  const collectNodes = (collectNode: Node) => {
-    const newNode: Node = {
-      id: collectNode.id,
-      name: collectNode.name,
-      x: collectNode.x,
-      y: collectNode.y,
-      width: collectNode.width,
-      height: collectNode.height,
-      type: collectNode.type,
-      rotation: collectNode.rotation,
-      cornerRadius: collectNode.cornerRadius,
-      children: undefined,
-    };
-    nodes.push(newNode);
-
-    if ('children' in collectNode) {
-      newNode.children = (collectNode.children as Array<Node>).map((child) =>
-        collectNodes(child),
-      );
-    }
-
-    return newNode;
+const extractNodeAttributes = (node: SceneNode): ExtractedNode => {
+  const extractedNode: ExtractedNode = {
+    id: node.id,
+    name: node.name,
+    type: node.type,
+    x: node.x,
+    y: node.y,
+    width: node.width,
+    height: node.height,
   };
-  collectNodes(node);
-  return nodes;
-};
 
-// 피그마로부터 선택된 노드를 가져오는 함수
-const getSelectedNodes = async () => {
-  const { selection } = figma.currentPage;
-  let nodes = [];
-  selection.forEach((node) => {
-    nodes = nodes.concat(getAllNodes(node));
-  });
-  return nodes;
-};
+  if ('children' in node) {
+    extractedNode.children = node.children.map(extractNodeAttributes);
+  }
 
-// 노드를 피그마 플러그인 UI로 전송하는 함수
-const postNodesToUI = (nodes) => {
-  figma.ui.postMessage({
-    type: 'nodes',
-    nodes,
-  });
+  return extractedNode;
 };
 
 // 위경도 좌표 레이어 추가 함수
@@ -228,8 +199,10 @@ figma.ui.onmessage = async (msg) => {
   const { type, nodes } = msg;
 
   if (type === 'get-nodes') {
-    const selectedNodes = await getSelectedNodes();
-    postNodesToUI(selectedNodes);
+    figma.ui.postMessage({
+      type: 'selected-nodes',
+      nodes: figma.currentPage.selection.map(extractNodeAttributes),
+    });
   }
   if (type === 'create-nodes') {
     const [firstNode] = nodes.map(createNodeInFigma);

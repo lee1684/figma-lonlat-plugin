@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import MapComponent from './component/Map';
 import FileUploader from './component/FileUploader';
-import { Node } from './types';
+import { ExtractedNode } from './types';
 import { nodesToCSV, downloadCSV } from './utils/lonLat';
 import './App.css';
 import { getLonLat } from './utils/polygon';
 
 const App: React.FC = () => {
-  const [nodes, setNodes] = useState<Node[]>([]);
+  const [nodes, setNodes] = useState<ExtractedNode[]>([]);
   const [center, setCenter] = useState<[number, number]>([126.978, 37.5665]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
@@ -17,7 +17,7 @@ const App: React.FC = () => {
 
     window.onmessage = (event) => {
       const message = event.data.pluginMessage;
-      if (message.type === 'nodes') {
+      if (message.type === 'selected-nodes') {
         setNodes(message.nodes);
       } else if (message.type === 'hide-loading') {
         setLoading(false);
@@ -25,7 +25,7 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const handleNodesParsed = (parsedNode: Node[]) => {
+  const handleNodesParsed = (parsedNode: ExtractedNode[]) => {
     setNodes(parsedNode);
     const { geometry } = parsedNode[0];
     if (geometry) {
