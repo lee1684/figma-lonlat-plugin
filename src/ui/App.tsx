@@ -83,19 +83,19 @@ const App: React.FC = () => {
         </button>
         <button
           type="button"
-          onClick={handleClearPolygons}
-          className="button"
-          disabled={nodes.length === 0}
-        >
-          폴리곤 초기화
-        </button>
-        <button
-          type="button"
           onClick={handleSendToFigma}
           className="button"
           disabled={nodes.length === 0}
         >
           피그마로 보내기
+        </button>
+        <button
+          type="button"
+          onClick={handleClearPolygons}
+          className="button"
+          disabled={nodes.length === 0}
+        >
+          폴리곤 초기화
         </button>
       </div>
       <div className="mapContainer">
