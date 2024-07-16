@@ -5,6 +5,25 @@ import { ExtractedNode } from '../types';
 
 const scale = 0.000001;
 
+const findCoordinatesLayerNode = (
+  deliveredNode: ExtractedNode[],
+): ExtractedNode | null => {
+  let foundNode: ExtractedNode | null = null;
+
+  deliveredNode.forEach((node) => {
+    if (node.name === 'Coordinates Layer') {
+      foundNode = node;
+    } else if (node.children) {
+      const childNode = findCoordinatesLayerNode(node.children);
+      if (childNode) {
+        foundNode = childNode;
+      }
+    }
+  });
+
+  return foundNode;
+};
+
 export const pixelToLonLat = (
   x: number,
   y: number,
@@ -33,6 +52,25 @@ export const createPolygon = (
   center: [number, number],
 ): Feature<Polygon>[] => {
   if (!nodes || nodes.length === 0) return [];
+
+  const coordinatesLayer = findCoordinatesLayerNode(nodes);
+  if (coordinatesLayer) {
+    const rawCoordinates = coordinatesLayer.children
+      .map((child) => child.name)
+      .map((childName) => {
+        const lonLat = childName.split(':')[1];
+        const lon = Number(lonLat.split(',')[0].trim());
+        const lat = Number(lonLat.split(',')[1].trim());
+        return [lon, lat];
+      });
+    rawCoordinates.push(rawCoordinates[0]);
+    const coordinates = rawCoordinates.map((coord) => fromLonLat(coord));
+
+    const polygon = new Polygon([coordinates]);
+    const feature = new Feature(polygon);
+
+    return [feature];
+  }
 
   const node = nodes[0];
   const { x, y, width, height, geometry } = node;

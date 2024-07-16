@@ -4,13 +4,14 @@ import FileUploader from './component/FileUploader';
 import { ExtractedNode } from './types';
 import { nodesToCSV, downloadCSV } from './utils/lonLat';
 import './App.css';
-import { getLonLat } from './utils/polygon';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
   const [center, setCenter] = useState<[number, number]>([126.978, 37.5665]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const mapRef =
+    useRef<{ getPolygonCoordinates: () => number[][] | null }>(null);
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-nodes' } }, '*');
@@ -57,9 +58,7 @@ const App: React.FC = () => {
   const handleSendToFigma = () => {
     setLoading(true);
 
-    const [topNode] = nodes;
-    const { x, y, width, height } = topNode;
-    const coordinates = getLonLat(x, y, width, height, center);
+    const coordinates = mapRef.current?.getPolygonCoordinates();
 
     parent.postMessage(
       { pluginMessage: { type: 'create-nodes', coordinates } },
@@ -101,6 +100,7 @@ const App: React.FC = () => {
       </div>
       <div className="mapContainer">
         <MapComponent
+          ref={mapRef}
           nodes={nodes}
           center={center}
           onCenterChange={handleCenterChange}

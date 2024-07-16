@@ -1,10 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
 import { OSM, Vector as VectorSource } from 'ol/source';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import { Feature } from 'ol';
+import { Polygon } from 'ol/geom';
 import { createVectorLayer } from '../layers/vectorLayer';
 import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
@@ -17,11 +24,10 @@ interface MapComponentProps {
   onCenterChange: (newCenter: [number, number]) => void;
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({
-  nodes,
-  center,
-  onCenterChange,
-}) => {
+const MapComponent = (
+  { nodes, center, onCenterChange }: MapComponentProps,
+  ref,
+) => {
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const currentZoomRef = useRef<number>(14);
@@ -111,6 +117,19 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   }, [center, nodes]);
 
+  useImperativeHandle(ref, () => ({
+    getPolygonCoordinates: () => {
+      const vectorLayer = mapRef.current
+        ?.getLayers()
+        .getArray()[1] as VectorLayer<Feature>;
+      const vectorSource = vectorLayer.getSource() as VectorSource;
+      const feature = vectorSource.getFeatures()[0];
+      return (feature.getGeometry() as Polygon)
+        .getCoordinates()[0]
+        .map((coord) => toLonLat(coord));
+    },
+  }));
+
   return (
     <div
       ref={mapElement}
@@ -123,4 +142,4 @@ const MapComponent: React.FC<MapComponentProps> = ({
   );
 };
 
-export default MapComponent;
+export default forwardRef(MapComponent);
