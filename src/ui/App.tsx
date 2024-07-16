@@ -57,18 +57,12 @@ const App: React.FC = () => {
   const handleSendToFigma = () => {
     setLoading(true);
 
-    const [topNode, ...otherNodes] = nodes;
+    const [topNode] = nodes;
     const { x, y, width, height } = topNode;
-    const nodesWithCoordinates = [
-      {
-        ...topNode,
-        coordinates: getLonLat(x, y, width, height, center),
-      },
-      ...otherNodes,
-    ];
+    const coordinates = getLonLat(x, y, width, height, center);
 
     parent.postMessage(
-      { pluginMessage: { type: 'create-nodes', nodes: nodesWithCoordinates } },
+      { pluginMessage: { type: 'create-nodes', coordinates } },
       '*',
     );
   };

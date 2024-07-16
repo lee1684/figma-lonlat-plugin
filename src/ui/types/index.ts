@@ -7,4 +7,5 @@ export type ExtractedNode = {
   width: number;
   height: number;
   children?: ExtractedNode[];
+  geometry?: string;
 };
