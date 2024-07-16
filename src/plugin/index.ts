@@ -154,12 +154,14 @@ const createNodeInFigma = (node: ExtractedNode): SceneNode => {
 };
 
 const extractNodeAttributes = (node: SceneNode): ExtractedNode => {
+  const hasAbsoluteRenderBounds =
+    'absoluteRenderBounds' in node && node.absoluteRenderBounds;
   const extractedNode: ExtractedNode = {
     id: node.id,
     name: node.name,
     type: node.type,
-    x: node.x,
-    y: node.y,
+    x: hasAbsoluteRenderBounds ? node.absoluteRenderBounds.x : node.x,
+    y: hasAbsoluteRenderBounds ? node.absoluteRenderBounds.y : node.y,
     width: node.width,
     height: node.height,
   };
