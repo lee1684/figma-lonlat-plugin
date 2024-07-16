@@ -108,10 +108,10 @@ const MapComponent = (
         vectorSource.addFeatures(polygons);
         const extent = vectorSource.getExtent();
         if (extent && extent[0] !== extent[2] && extent[1] !== extent[3]) {
-          const currentCenter = view.getCenter();
-          view.fit(extent, { padding: [100, 100, 100, 100] });
-          view.setCenter(currentCenter);
-          view.setZoom(currentZoom);
+          const centerX = (extent[0] + extent[2]) / 2;
+          const centerY = (extent[1] + extent[3]) / 2;
+          const newCenter = toLonLat([centerX, centerY]) as [number, number];
+          view.setCenter(fromLonLat(newCenter));
         }
       }
     }
