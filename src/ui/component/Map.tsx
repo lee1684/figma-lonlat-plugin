@@ -1,4 +1,5 @@
 import React, {
+  Ref,
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -20,17 +21,22 @@ import { ExtractedNode } from '../types';
 
 interface MapComponentProps {
   nodes: ExtractedNode[];
-  center: [number, number];
-  onCenterChange: (newCenter: [number, number]) => void;
+}
+
+export interface MapComponentHandle {
+  getPolygonCoordinates: () => number[][] | null;
+  getCenter: () => [number, number] | null;
+  setCenter: (newCenter: [number, number]) => void;
 }
 
 const MapComponent = (
-  { nodes, center, onCenterChange }: MapComponentProps,
-  ref,
+  { nodes }: MapComponentProps,
+  ref: Ref<MapComponentHandle>,
 ) => {
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const currentZoomRef = useRef<number>(14);
+  const [center, setCenter] = useState<[number, number]>([126.978, 37.5665]);
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
@@ -66,7 +72,7 @@ const MapComponent = (
       const clickedCoordinate = toLonLat(
         map.getCoordinateFromPixel(event.pixel),
       ) as [number, number];
-      onCenterChange(clickedCoordinate);
+      setCenter(clickedCoordinate);
     });
 
     map.getView().on('change:resolution', () => {
@@ -88,7 +94,7 @@ const MapComponent = (
         mapElement.current.removeEventListener('mouseup', handleMouseUp);
       }
     };
-  }, [onCenterChange]);
+  }, []);
 
   useEffect(() => {
     if (mapRef.current) {
@@ -127,6 +133,10 @@ const MapComponent = (
       return (feature.getGeometry() as Polygon)
         .getCoordinates()[0]
         .map((coord) => toLonLat(coord));
+    },
+    getCenter: () => center,
+    setCenter: (newCenter: [number, number]) => {
+      setCenter(newCenter);
     },
   }));
 

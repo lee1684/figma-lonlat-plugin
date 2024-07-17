@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import MapComponent from './component/Map';
+import MapComponent, { MapComponentHandle } from './component/Map';
 import FileUploader from './component/FileUploader';
 import { ExtractedNode } from './types';
 import { nodesToCSV, downloadCSV } from './utils/lonLat';
@@ -7,11 +7,9 @@ import './App.css';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
-  const [center, setCenter] = useState<[number, number]>([126.978, 37.5665]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
-  const mapRef =
-    useRef<{ getPolygonCoordinates: () => number[][] | null }>(null);
+  const mapRef = useRef<MapComponentHandle>(null);
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-nodes' } }, '*');
@@ -35,15 +33,12 @@ const App: React.FC = () => {
         .replace('))', '')
         .split(',')
         .map((coord) => coord.trim().split(' ').map(Number))[0];
-      setCenter([polygonTopLeft[0], polygonTopLeft[1]]);
+      mapRef.current?.setCenter([polygonTopLeft[0], polygonTopLeft[1]]);
     }
   };
 
-  const handleCenterChange = (newCenter: [number, number]) => {
-    setCenter(newCenter);
-  };
-
   const handleDownloadCSV = () => {
+    const center = mapRef.current?.getCenter();
     const csv = nodesToCSV(nodes, center);
     downloadCSV(csv, 'lonlat.csv');
   };
@@ -99,12 +94,7 @@ const App: React.FC = () => {
         </button>
       </div>
       <div className="mapContainer">
-        <MapComponent
-          ref={mapRef}
-          nodes={nodes}
-          center={center}
-          onCenterChange={handleCenterChange}
-        />
+        <MapComponent ref={mapRef} nodes={nodes} />
       </div>
       {loading && (
         <div className="loading-overlay">
