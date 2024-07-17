@@ -144,11 +144,7 @@ const MapComponent = (
   return (
     <div
       ref={mapElement}
-      style={{
-        width: '100%',
-        height: '100%',
-        cursor: isDragging ? 'grabbing' : 'crosshair',
-      }}
+      style={{ cursor: isDragging ? 'grabbing' : 'crosshair' }}
     />
   );
 };
