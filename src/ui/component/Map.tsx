@@ -13,6 +13,7 @@ import { OSM, Vector as VectorSource } from 'ol/source';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import { Feature } from 'ol';
 import { Polygon } from 'ol/geom';
+import { Coordinate } from 'ol/coordinate';
 import { createVectorLayer } from '../layers/vectorLayer';
 import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
@@ -25,8 +26,8 @@ interface MapComponentProps {
 
 export interface MapComponentHandle {
   getPolygonCoordinates: () => number[][] | null;
-  getCenter: () => [number, number] | null;
-  setCenter: (newCenter: [number, number]) => void;
+  getCenter: () => Coordinate | null;
+  setCenter: (newCenter: Coordinate) => void;
 }
 
 const MapComponent = (
@@ -36,7 +37,7 @@ const MapComponent = (
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const currentZoomRef = useRef<number>(14);
-  const [center, setCenter] = useState<[number, number]>([126.978, 37.5665]);
+  const [center, setCenter] = useState<Coordinate>([126.978, 37.5665]);
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
@@ -116,7 +117,7 @@ const MapComponent = (
         if (extent && extent[0] !== extent[2] && extent[1] !== extent[3]) {
           const centerX = (extent[0] + extent[2]) / 2;
           const centerY = (extent[1] + extent[3]) / 2;
-          const newCenter = toLonLat([centerX, centerY]) as [number, number];
+          const newCenter = toLonLat([centerX, centerY]);
           view.setCenter(fromLonLat(newCenter));
         }
       }

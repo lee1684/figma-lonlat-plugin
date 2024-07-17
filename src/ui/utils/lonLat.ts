@@ -1,10 +1,11 @@
+import { Coordinate } from 'ol/coordinate';
 import { ExtractedNode } from '../types';
 import { pixelToLonLat } from './polygon';
 
   const header = 'name,x,y,width,height,rotation,cornerRadius,geometry\n';
 export const nodesToCSV = (
   nodes: ExtractedNode[],
-  center: [number, number],
+  center: Coordinate,
 ): string => {
   const rows = nodes
     .map((node) => {

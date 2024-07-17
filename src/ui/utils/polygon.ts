@@ -1,6 +1,7 @@
 import { Feature } from 'ol';
 import { Polygon } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
+import { Coordinate } from 'ol/coordinate';
 import { ExtractedNode } from '../types';
 
 const scale = 0.000001;
@@ -27,8 +28,8 @@ const findCoordinatesLayerNode = (
 export const pixelToLonLat = (
   x: number,
   y: number,
-  center: [number, number],
-): [number, number] => {
+  center: Coordinate,
+): Coordinate => {
   return [center[0] + x * scale, center[1] - y * scale];
 };
 
@@ -37,7 +38,7 @@ export const getLonLat = (
   y: number,
   width: number,
   height: number,
-  center: [number, number],
+  center: Coordinate,
 ) => {
   const topLeft = pixelToLonLat(x, y, center);
   const topRight = pixelToLonLat(x + width, y, center);
@@ -49,7 +50,7 @@ export const getLonLat = (
 
 export const createPolygon = (
   nodes: ExtractedNode[],
-  center: [number, number],
+  center: Coordinate,
 ): Feature<Polygon>[] => {
   if (!nodes || nodes.length === 0) return [];
 
