@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [json, setJson] = useState(null);
   const mapRef = useRef<MapComponentHandle>(null);
 
   useEffect(() => {
@@ -25,17 +26,50 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const handleNodesParsed = (parsedNode: ExtractedNode[]) => {
-    setNodes(parsedNode);
-    const { geometry } = parsedNode[0];
-    if (geometry) {
-      const polygonTopLeft = geometry
-        .replace('POLYGON((', '')
-        .replace('))', '')
-        .split(',')
-        .map((coord) => coord.trim().split(' ').map(Number))[0];
-      mapRef.current?.setCenter([polygonTopLeft[0], polygonTopLeft[1]]);
-    }
+  function parsePolygonGeometry(polygonString: string) {
+    const coordinatesString = polygonString.match(/\(\((.+?)\)\)/)[1];
+    const coordinates = coordinatesString
+      .split(', ')
+      .map((pair) => pair.split(' ').map(Number));
+    return coordinates;
+  }
+
+  function calculateCenter(polygonGeometry: string) {
+    const coordinates = parsePolygonGeometry(polygonGeometry);
+    const numPoints = coordinates.length;
+    let sumX = 0;
+    let sumY = 0;
+
+    coordinates.forEach((coord) => {
+      sumX += coord[0];
+      sumY += coord[1];
+    });
+
+    return [sumX / numPoints, sumY / numPoints];
+  }
+
+  const handleJsonUploaded = (jsonString: string) => {
+    const jsonObject = JSON.parse(jsonString);
+    setJson(jsonObject);
+
+    const { id, name, type, polygon, absoluteBoundingBox } = jsonObject;
+    const { x, y, width, height } = absoluteBoundingBox;
+    const nodesFromJson: ExtractedNode[] = [];
+    const node: ExtractedNode = {
+      id,
+      name,
+      type,
+      x,
+      y,
+      width,
+      height,
+      geometry: polygon,
+    };
+    nodesFromJson.push(node);
+    setNodes(nodesFromJson);
+
+    const center = calculateCenter(polygon);
+    mapRef.current?.setCenter(center);
   };
 
   const handleDownloadJSON = async () => {
@@ -79,7 +113,7 @@ const App: React.FC = () => {
     <div className="container">
       <div className="header">
         <FileUploader
-          onNodesParsed={handleNodesParsed}
+          onJsonUploaded={handleJsonUploaded}
           fileInputRef={fileInputRef}
         />
         <button

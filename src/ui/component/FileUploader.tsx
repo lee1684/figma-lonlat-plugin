@@ -1,20 +1,25 @@
 import React, { ChangeEvent, RefObject } from 'react';
-import { parseCSV } from '../utils/CSVParser';
-import { ExtractedNode } from '../types';
 
 interface FileUploaderProps {
-  onNodesParsed: (node: ExtractedNode[]) => void;
+  onJsonUploaded: (jsonString: string) => void;
   fileInputRef: RefObject<HTMLInputElement>;
 }
 
 const FileUploader: React.FC<FileUploaderProps> = ({
-  onNodesParsed,
+  onJsonUploaded,
   fileInputRef,
 }) => {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      parseCSV(file).then(onNodesParsed).catch(console.error);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const jsonString = reader.result;
+        if (typeof jsonString === 'string') {
+          onJsonUploaded(jsonString);
+        }
+      };
+      reader.readAsText(file);
     }
   };
 
