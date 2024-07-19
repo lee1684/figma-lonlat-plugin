@@ -4,13 +4,14 @@ import FileUploader from './component/FileUploader';
 import { ExtractedNode } from './types';
 import './App.css';
 import { downloadJson, getPolygonGeometry } from './utils/lonLat';
-import { FILE_ID, TOKEN } from '../config';
+import { TOKEN } from '../config';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [json, setJson] = useState(null);
+  const [fileKey, setFileKey] = useState('');
   const mapRef = useRef<MapComponentHandle>(null);
 
   useEffect(() => {
@@ -18,9 +19,12 @@ const App: React.FC = () => {
 
     window.onmessage = (event) => {
       const message = event.data.pluginMessage;
-      if (message.type === 'selected-nodes') {
-        setNodes(message.nodes);
-      } else if (message.type === 'hide-loading') {
+      const { type, nodes, fileKey } = message;
+
+      if (type === 'selected-nodes') {
+        setFileKey(fileKey);
+        setNodes(nodes);
+      } else if (type === 'hide-loading') {
         setLoading(false);
       }
     };
@@ -76,7 +80,7 @@ const App: React.FC = () => {
     setLoading(true);
     const nodeId = nodes[0].id;
     const response = await fetch(
-      `https://api.figma.com/v1/files/${FILE_ID}/nodes?ids=${nodeId}&geometry=paths`,
+      `https://api.figma.com/v1/files/${fileKey}/nodes?ids=${nodeId}&geometry=paths`,
       {
         headers: {
           'X-Figma-Token': TOKEN,

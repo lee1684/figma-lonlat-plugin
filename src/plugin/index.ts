@@ -76,6 +76,7 @@ figma.ui.onmessage = async (msg) => {
   if (type === 'get-nodes') {
     figma.ui.postMessage({
       type: 'selected-nodes',
+      fileKey: figma.fileKey,
       nodes: figma.currentPage.selection.map(extractNodeAttributes),
     });
   }
