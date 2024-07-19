@@ -2,8 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import MapComponent, { MapComponentHandle } from './component/Map';
 import FileUploader from './component/FileUploader';
 import { ExtractedNode } from './types';
-import { nodesToCSV, downloadCSV } from './utils/lonLat';
 import './App.css';
+import { downloadJson, getPolygonGeometry } from './utils/lonLat';
+import { FILE_ID, TOKEN } from '../config';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
@@ -37,10 +38,23 @@ const App: React.FC = () => {
     }
   };
 
-  const handleDownloadCSV = () => {
-    const center = mapRef.current?.getCenter();
-    const csv = nodesToCSV(nodes, center);
-    downloadCSV(csv, 'lonlat.csv');
+  const handleDownloadJSON = async () => {
+    setLoading(true);
+    const nodeId = nodes[0].id;
+    const response = await fetch(
+      `https://api.figma.com/v1/files/${FILE_ID}/nodes?ids=${nodeId}&geometry=paths`,
+      {
+        headers: {
+          'X-Figma-Token': TOKEN,
+        },
+      },
+    );
+    const data = await response.json();
+    setLoading(false);
+    const nodeData = data.nodes[nodeId].document;
+    const polygonCoordinates = mapRef.current?.getPolygonCoordinates();
+    nodeData.polygon = getPolygonGeometry(polygonCoordinates);
+    downloadJson(nodeData, 'figma_node.json');
   };
 
   const handleClearPolygons = () => {
@@ -70,11 +84,11 @@ const App: React.FC = () => {
         />
         <button
           type="button"
-          onClick={handleDownloadCSV}
+          onClick={handleDownloadJSON}
           className="button"
           disabled={nodes.length === 0}
         >
-          위경도 좌표 다운로드
+          JSON 다운로드
         </button>
         <button
           type="button"
