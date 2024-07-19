@@ -27,11 +27,24 @@ const addHiddenLayer = async (
 ) => {
   await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
 
+  const labels = ['좌상단', '우상단', '우하단', '좌하단'];
+
+  const existCoordinatesLayer = (parentNode as any).children.find(
+    (child) => child.name === 'Coordinates Layer',
+  );
+
+  if (existCoordinatesLayer) {
+    existCoordinatesLayer.children.forEach((child, index) => {
+      if (index < coordinates.length - 1) {
+        const textNode = child as TextNode;
+        textNode.characters = `${labels[index]}: ${coordinates[index][0]}, ${coordinates[index][1]}`;
+      }
+    });
+    return;
+  }
   const hiddenLayer = figma.createFrame();
   hiddenLayer.visible = false;
   hiddenLayer.name = 'Coordinates Layer';
-
-  const labels = ['좌상단', '우상단', '우하단', '좌하단'];
 
   coordinates.forEach((coord, index) => {
     if (index === coordinates.length - 1) {
