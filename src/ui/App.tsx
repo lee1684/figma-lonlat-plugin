@@ -104,7 +104,13 @@ const App: React.FC = () => {
     const coordinates = mapRef.current?.getPolygonCoordinates();
 
     parent.postMessage(
-      { pluginMessage: { type: 'create-nodes', coordinates } },
+      {
+        pluginMessage: {
+          type: 'create-nodes',
+          coordinates,
+          json,
+        },
+      },
       '*',
     );
   };

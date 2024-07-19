@@ -22,7 +22,7 @@ const extractNodeAttributes = (node: SceneNode): ExtractedNode => {
 
 // 위경도 좌표 레이어 추가 함수
 const addHiddenLayer = async (
-  parentNode: SceneNode,
+  parentNode: BaseNode,
   coordinates: [number, number][],
 ) => {
   await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
@@ -58,7 +58,7 @@ const addHiddenLayer = async (
 
 // 메시지 핸들러 함수
 figma.ui.onmessage = async (msg) => {
-  const { type, coordinates } = msg;
+  const { type, coordinates, json } = msg;
 
   if (type === 'get-nodes') {
     figma.ui.postMessage({
@@ -67,21 +67,15 @@ figma.ui.onmessage = async (msg) => {
     });
   }
   if (type === 'create-nodes') {
-    const originalNodes = figma.currentPage.selection[0];
-    const hasAbsoluteRenderBounds =
-      'absoluteRenderBounds' in originalNodes &&
-      originalNodes.absoluteRenderBounds;
-    const clone = originalNodes.clone();
-    clone.x = hasAbsoluteRenderBounds
-      ? originalNodes.absoluteRenderBounds.x
-      : originalNodes.x;
-    clone.y = hasAbsoluteRenderBounds
-      ? originalNodes.absoluteRenderBounds.y
-      : originalNodes.y;
-    if ('expanded' in clone) {
-      clone.expanded = false;
+    const originalNode =
+      figma.getNodeById(json?.id) ?? figma.currentPage.selection[0];
+
+    if (json) {
+      // JSON 파일에서 직접적으로 업데이트 하고자 하는 속성들을 searchedNode의 속성에 할당해줘야 피그마에 반영됩니다.
+      // JSON으로부터 어떤 속성값을 직접 업데이트할 수 있게끔 허용할지 허용 범위를 설정합니다.
+      originalNode.name = json.name;
     }
-    await addHiddenLayer(clone, coordinates);
+    await addHiddenLayer(originalNode, coordinates);
 
     figma.ui.postMessage({ type: 'hide-loading' });
   }
