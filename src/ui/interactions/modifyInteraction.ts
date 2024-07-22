@@ -2,9 +2,7 @@ import { Map, Feature } from 'ol';
 import { Modify } from 'ol/interaction';
 import { Geometry, Point } from 'ol/geom';
 import { Vector as VectorSource } from 'ol/source';
-
-import { getCenter, getHeight, getWidth } from 'ol/extent';
-import { never, primaryAction } from 'ol/events/condition';
+import { getCenter } from 'ol/extent';
 
 export const addModifyInteraction = (
   map: Map,
@@ -12,52 +10,42 @@ export const addModifyInteraction = (
 ) => {
   const modify = new Modify({
     source: vectorSource,
-    condition: (event) => primaryAction(event),
-    deleteCondition: never,
-    insertVertexCondition: never,
     style: (feature, resolution) => {
       feature.get('features').forEach((modifyFeature) => {
         const modifyGeometry = modifyFeature.get('modifyGeometry');
-        if (modifyGeometry) {
-          const geometry = feature.getGeometry();
-          if (geometry && geometry instanceof Point) {
-            const point = geometry.getCoordinates();
-            let modifyPoint = modifyGeometry.point;
-            if (!modifyPoint) {
-              modifyPoint = point;
-              modifyGeometry.point = modifyPoint;
-              modifyGeometry.geometry0 = modifyGeometry.geometry;
-            }
-            const center = getCenter(modifyGeometry.geometry0.getExtent());
-            const minRadius =
-              Math.max(
-                getWidth(modifyGeometry.geometry0.getExtent()),
-                getHeight(modifyGeometry.geometry0.getExtent()),
-              ) / 3;
-            let dx;
-            let dy;
-            dx = modifyPoint[0] - center[0];
-            dy = modifyPoint[1] - center[1];
-            const initialRadius = Math.sqrt(dx * dx + dy * dy);
-            if (initialRadius > minRadius) {
-              const initialAngle = Math.atan2(dy, dx);
-              dx = point[0] - center[0];
-              dy = point[1] - center[1];
-              const currentRadius = Math.sqrt(dx * dx + dy * dy);
-              if (currentRadius > 0) {
-                const currentAngle = Math.atan2(dy, dx);
-                const modifiedGeometry = modifyGeometry.geometry0.clone();
-                modifiedGeometry.scale(
-                  currentRadius / initialRadius,
-                  undefined,
-                  center,
-                );
-                modifiedGeometry.rotate(currentAngle - initialAngle, center);
-                modifyGeometry.geometry = modifiedGeometry;
-              }
-            }
-          }
+        if (!modifyGeometry) {
+          return;
         }
+        const geometry = feature.getGeometry();
+        if (!geometry || !(geometry instanceof Point)) {
+          return;
+        }
+        const point = geometry.getCoordinates();
+        let modifyPoint = modifyGeometry.point;
+        if (!modifyPoint) {
+          modifyPoint = point;
+          modifyGeometry.point = modifyPoint;
+          modifyGeometry.geometry0 = modifyGeometry.geometry;
+        }
+        const originalGeometry = modifyGeometry.geometry0;
+        const center = getCenter(originalGeometry.getExtent());
+        let dx;
+        let dy;
+        dx = modifyPoint[0] - center[0];
+        dy = modifyPoint[1] - center[1];
+        const initialRadius = Math.sqrt(dx * dx + dy * dy);
+        const initialAngle = Math.atan2(dy, dx);
+        dx = point[0] - center[0];
+        dy = point[1] - center[1];
+        const currentRadius = Math.sqrt(dx * dx + dy * dy);
+        if (currentRadius <= 0) {
+          return;
+        }
+        const currentAngle = Math.atan2(dy, dx);
+        const clonedGeometry = originalGeometry.clone();
+        clonedGeometry.scale(currentRadius / initialRadius, undefined, center);
+        clonedGeometry.rotate(currentAngle - initialAngle, center);
+        modifyGeometry.geometry = clonedGeometry;
       });
       const defaultStyle = new Modify({ source: vectorSource })
         .getOverlay()
