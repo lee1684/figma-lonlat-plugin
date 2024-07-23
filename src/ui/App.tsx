@@ -3,7 +3,7 @@ import MapComponent, { MapComponentHandle } from './component/Map';
 import FileUploader from './component/FileUploader';
 import { ExtractedNode, NodeWithSVG } from './types';
 import './App.css';
-import { downloadJson, getPolygonGeometry } from './utils/lonLat';
+import { downloadJson, downloadSvg, getPolygonGeometry } from './utils/lonLat';
 import { TOKEN } from '../config';
 
 const App: React.FC = () => {
@@ -97,6 +97,26 @@ const App: React.FC = () => {
     downloadJson(nodeData, 'figma_node.json');
   };
 
+  const handleDownloadSvg = () => {
+    const polygonCoordinates = mapRef.current?.getPolygonCoordinates();
+    const { id, name, type, x, y, width, height } = nodes[0];
+    const parentNode: ExtractedNode = {
+      id,
+      name,
+      type,
+      x,
+      y,
+      width,
+      height,
+      geometry: getPolygonGeometry(polygonCoordinates),
+    };
+    const json: NodeWithSVG = {
+      parentNode,
+      svgString: new TextDecoder().decode(svg),
+    };
+    downloadSvg(json, 'figma_svg');
+  };
+
   const handleClearPolygons = () => {
     setNodes([]);
     if (fileInputRef.current) {
@@ -130,7 +150,7 @@ const App: React.FC = () => {
         />
         <button
           type="button"
-          onClick={handleDownloadJSON}
+          onClick={handleDownloadSvg}
           className="button"
           disabled={nodes.length === 0}
         >

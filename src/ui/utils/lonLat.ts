@@ -1,3 +1,5 @@
+import { NodeWithSVG } from '../types';
+
 export const getPolygonGeometry = (polygonCoordinates: number[][]) => {
   const topLeft = polygonCoordinates[0];
   const topRight = polygonCoordinates[1];
@@ -19,5 +21,18 @@ export const downloadJson = (data, fileName: string) => {
   link.click();
 
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+export const downloadSvg = (data: NodeWithSVG, filename: string) => {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 };
