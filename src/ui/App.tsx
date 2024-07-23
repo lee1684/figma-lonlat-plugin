@@ -134,7 +134,7 @@ const App: React.FC = () => {
         pluginMessage: {
           type: 'create-nodes',
           coordinates,
-          json,
+          svg,
         },
       },
       '*',

@@ -1,4 +1,4 @@
-import { ExtractedNode } from '../ui/types';
+import { CLIP_PATH_GROUP, ExtractedNode } from '../ui/types';
 
 figma.showUI(__html__, { width: 1500, height: 600 });
 
@@ -82,6 +82,48 @@ const exportSVG = async (node: SceneNode) => {
 
   return svg;
 };
+
+const findNodeByName = (name: string): SceneNode | null => {
+  const findNode = (nodes: ReadonlyArray<SceneNode>): SceneNode | null => {
+    return nodes.reduce((found: SceneNode | null, node: SceneNode) => {
+      if (found) return found;
+      if (node.name === name) return node;
+      if ('children' in node) return findNode(node.children);
+      return null;
+    }, null);
+  };
+  return findNode(figma.currentPage.children);
+};
+
+const uint8ArrayToString = (uint8Array: Uint8Array): string => {
+  let result = '';
+  const chunkSize = 0x8000; // 32 KB
+
+  for (let i = 0; i < uint8Array.length; i += chunkSize) {
+    const chunk = uint8Array.subarray(i, i + chunkSize);
+    result += String.fromCharCode.apply(null, chunk);
+  }
+
+  return result;
+};
+
+const createFigmaNode = (uint8Array: Uint8Array) => {
+  const svgString = uint8ArrayToString(uint8Array);
+  const nodeFromSvg = figma.createNodeFromSvg(svgString);
+  const clipPathGroupNode = nodeFromSvg.children.find((child) => child.name === CLIP_PATH_GROUP,);
+  const realNode = clipPathGroupNode
+    ? (clipPathGroupNode as ChildrenMixin).children[1]
+    : nodeFromSvg.children[0];
+  const searchedNode = findNodeByName(realNode.name);
+  if (searchedNode && 'absoluteRenderBounds' in searchedNode) {
+    realNode.x = searchedNode.absoluteRenderBounds.x;
+    realNode.y = searchedNode.absoluteRenderBounds.y;
+  }
+  figma.currentPage.appendChild(realNode);
+  nodeFromSvg.remove();
+  return realNode;
+};
+
 // 메시지 핸들러 함수
 figma.ui.onmessage = async (msg) => {
   const { type, coordinates, svg } = msg;
@@ -96,15 +138,8 @@ figma.ui.onmessage = async (msg) => {
     });
   }
   if (type === 'create-nodes') {
-    const originalNode =
-      figma.getNodeById(json?.id) ?? figma.currentPage.selection[0];
-
-    if (json) {
-      // JSON 파일에서 직접적으로 업데이트 하고자 하는 속성들을 searchedNode의 속성에 할당해줘야 피그마에 반영됩니다.
-      // JSON으로부터 어떤 속성값을 직접 업데이트할 수 있게끔 허용할지 허용 범위를 설정합니다.
-      originalNode.name = json.name;
-    }
-    await addHiddenLayer(originalNode, coordinates);
+    const createdNode = createFigmaNode(svg);
+    await addHiddenLayer(createdNode, coordinates);
 
     figma.ui.postMessage({ type: 'hide-loading' });
   }
