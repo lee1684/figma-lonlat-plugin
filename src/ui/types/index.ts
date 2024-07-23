@@ -9,3 +9,10 @@ export type ExtractedNode = {
   children?: ExtractedNode[];
   geometry?: string;
 };
+
+export type NodeWithSVG = {
+  parentNode: ExtractedNode;
+  svgString: string;
+};
+
+export const CLIP_PATH_GROUP = 'Clip path group';

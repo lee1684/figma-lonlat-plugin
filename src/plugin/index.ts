@@ -69,15 +69,30 @@ const addHiddenLayer = async (
   }
 };
 
+const exportSVG = async (node: SceneNode) => {
+  if (!node) {
+    return null;
+  }
+  const svg = await node.exportAsync({
+    format: 'SVG',
+    svgIdAttribute: true,
+    svgOutlineText: false,
+    svgSimplifyStroke: false,
+  });
+
+  return svg;
+};
 // 메시지 핸들러 함수
 figma.ui.onmessage = async (msg) => {
-  const { type, coordinates, json } = msg;
+  const { type, coordinates, svg } = msg;
 
   if (type === 'get-nodes') {
+    const svg = await exportSVG(figma.currentPage.selection[0]);
     figma.ui.postMessage({
       type: 'selected-nodes',
       fileKey: figma.fileKey,
       nodes: figma.currentPage.selection.map(extractNodeAttributes),
+      svg,
     });
   }
   if (type === 'create-nodes') {

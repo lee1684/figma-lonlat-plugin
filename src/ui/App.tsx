@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import MapComponent, { MapComponentHandle } from './component/Map';
 import FileUploader from './component/FileUploader';
-import { ExtractedNode } from './types';
+import { ExtractedNode, NodeWithSVG } from './types';
 import './App.css';
 import { downloadJson, getPolygonGeometry } from './utils/lonLat';
 import { TOKEN } from '../config';
@@ -11,6 +11,7 @@ const App: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [json, setJson] = useState(null);
+  const [svg, setSvg] = useState(null);
   const [fileKey, setFileKey] = useState('');
   const mapRef = useRef<MapComponentHandle>(null);
 
@@ -19,9 +20,10 @@ const App: React.FC = () => {
 
     window.onmessage = (event) => {
       const message = event.data.pluginMessage;
-      const { type, nodes, fileKey } = message;
+      const { type, nodes, fileKey, svg } = message;
 
       if (type === 'selected-nodes') {
+        setSvg(svg);
         setFileKey(fileKey);
         setNodes(nodes);
       } else if (type === 'hide-loading') {
@@ -53,11 +55,9 @@ const App: React.FC = () => {
   }
 
   const handleJsonUploaded = (jsonString: string) => {
-    const jsonObject = JSON.parse(jsonString);
-    setJson(jsonObject);
-
-    const { id, name, type, polygon, absoluteBoundingBox } = jsonObject;
-    const { x, y, width, height } = absoluteBoundingBox;
+    const jsonObject: NodeWithSVG = JSON.parse(jsonString);
+    const { parentNode, svgString } = jsonObject;
+    const { id, name, type, x, y, width, height, geometry } = parentNode;
     const nodesFromJson: ExtractedNode[] = [];
     const node: ExtractedNode = {
       id,
@@ -67,13 +67,15 @@ const App: React.FC = () => {
       y,
       width,
       height,
-      geometry: polygon,
+      geometry,
     };
     nodesFromJson.push(node);
     setNodes(nodesFromJson);
 
-    const center = calculateCenter(polygon);
+    const center = calculateCenter(geometry);
     mapRef.current?.setCenter(center);
+    const svg = new TextEncoder().encode(svgString);
+    setSvg(svg);
   };
 
   const handleDownloadJSON = async () => {
