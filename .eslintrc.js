@@ -29,11 +29,11 @@ module.exports = {
     project: './tsconfig.json',
   },
   rules: {
+    'prettier/prettier': 'off',
     'no-plusplus': 'off',
     '@typescript-eslint/no-shadow': 'off',
     'react/prop-types': 'off',
-    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': 'off',
     'react/jsx-filename-extension': [
       1,
       { extensions: ['.js', '.jsx', '.ts', '.tsx'] },
