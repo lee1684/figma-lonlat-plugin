@@ -3,8 +3,9 @@ import MapComponent, { MapComponentHandle } from './component/Map';
 import FileUploader from './component/FileUploader';
 import { ExtractedNode, NodeWithSVG } from './types';
 import './App.css';
-import { downloadJson, downloadLonLat, downloadSvg, getPolygonGeometry, translateNodesToCSV } from './utils/lonLat';
+import { calculateCenter, downloadJson, downloadLonLat, downloadSvg, translateNodesToCSV } from './utils/lonLat';
 import { TOKEN } from '../config';
+import { getPolygonGeometry } from './utils/polygon';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
@@ -31,28 +32,6 @@ const App: React.FC = () => {
       }
     };
   }, []);
-
-  function parsePolygonGeometry(polygonString: string) {
-    const coordinatesString = polygonString.match(/\(\((.+?)\)\)/)[1];
-    const coordinates = coordinatesString
-      .split(', ')
-      .map((pair) => pair.split(' ').map(Number));
-    return coordinates;
-  }
-
-  function calculateCenter(polygonGeometry: string) {
-    const coordinates = parsePolygonGeometry(polygonGeometry);
-    const numPoints = coordinates.length;
-    let sumX = 0;
-    let sumY = 0;
-
-    coordinates.forEach((coord) => {
-      sumX += coord[0];
-      sumY += coord[1];
-    });
-
-    return [sumX / numPoints, sumY / numPoints];
-  }
 
   const handleJsonUploaded = (jsonString: string) => {
     const jsonObject: NodeWithSVG = JSON.parse(jsonString);

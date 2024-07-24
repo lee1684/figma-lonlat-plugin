@@ -1,13 +1,28 @@
 import { Coordinate } from 'ol/coordinate';
 import { ExtractedNode, NodeWithSVG } from '../types';
-import { pixelToLonLat } from './polygon';
 
-export const getPolygonGeometry = (polygonCoordinates: number[][]) => {
-  const topLeft = polygonCoordinates[0];
-  const topRight = polygonCoordinates[1];
-  const bottomRight = polygonCoordinates[2];
-  const bottomLeft = polygonCoordinates[3];
-  return `POLYGON((${topLeft[0]} ${topLeft[1]}, ${topRight[0]} ${topRight[1]}, ${bottomRight[0]} ${bottomRight[1]}, ${bottomLeft[0]} ${bottomLeft[1]}, ${topLeft[0]} ${topLeft[1]}))`;
+export const pixelToLonLat = (
+  x: number,
+  y: number,
+  center: Coordinate,
+): Coordinate => {
+  const scale = 0.000001;
+  return [center[0] + x * scale, center[1] - y * scale];
+};
+
+export const getLonLat = (
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  center: Coordinate,
+) => {
+  const topLeft = pixelToLonLat(x, y, center);
+  const topRight = pixelToLonLat(x + width, y, center);
+  const bottomRight = pixelToLonLat(x + width, y + height, center);
+  const bottomLeft = pixelToLonLat(x, y + height, center);
+
+  return [topLeft, topRight, bottomRight, bottomLeft, topLeft];
 };
 
 export const downloadJson = (data, fileName: string) => {
@@ -82,4 +97,26 @@ export const downloadLonLat = (csv: string, filename: string) => {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+const parsePolygonGeometry = (polygonString: string) => {
+  const coordinatesString = polygonString.match(/\(\((.+?)\)\)/)[1];
+  const coordinates = coordinatesString
+    .split(', ')
+    .map((pair) => pair.split(' ').map(Number));
+  return coordinates;
+}
+
+export const calculateCenter = (polygonGeometry: string) => {
+  const coordinates = parsePolygonGeometry(polygonGeometry);
+  const numPoints = coordinates.length;
+  let sumX = 0;
+  let sumY = 0;
+
+  coordinates.forEach((coord) => {
+    sumX += coord[0];
+    sumY += coord[1];
+  });
+
+  return [sumX / numPoints, sumY / numPoints];
 }

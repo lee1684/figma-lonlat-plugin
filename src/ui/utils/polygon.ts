@@ -3,8 +3,15 @@ import { Polygon } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { ExtractedNode } from '../types';
+import { getLonLat } from './lonLat';
 
-const scale = 0.000001;
+export const getPolygonGeometry = (polygonCoordinates: number[][]) => {
+  const topLeft = polygonCoordinates[0];
+  const topRight = polygonCoordinates[1];
+  const bottomRight = polygonCoordinates[2];
+  const bottomLeft = polygonCoordinates[3];
+  return `POLYGON((${topLeft[0]} ${topLeft[1]}, ${topRight[0]} ${topRight[1]}, ${bottomRight[0]} ${bottomRight[1]}, ${bottomLeft[0]} ${bottomLeft[1]}, ${topLeft[0]} ${topLeft[1]}))`;
+};
 
 const findCoordinatesLayerNode = (
   deliveredNode: ExtractedNode[],
@@ -23,29 +30,6 @@ const findCoordinatesLayerNode = (
   });
 
   return foundNode;
-};
-
-export const pixelToLonLat = (
-  x: number,
-  y: number,
-  center: Coordinate,
-): Coordinate => {
-  return [center[0] + x * scale, center[1] - y * scale];
-};
-
-export const getLonLat = (
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  center: Coordinate,
-) => {
-  const topLeft = pixelToLonLat(x, y, center);
-  const topRight = pixelToLonLat(x + width, y, center);
-  const bottomRight = pixelToLonLat(x + width, y + height, center);
-  const bottomLeft = pixelToLonLat(x, y + height, center);
-
-  return [topLeft, topRight, bottomRight, bottomLeft, topLeft];
 };
 
 export const createPolygon = (
