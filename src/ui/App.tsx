@@ -3,9 +3,10 @@ import MapComponent, { MapComponentHandle } from './component/Map';
 import FileUploader from './component/FileUploader';
 import { ExtractedNode, NodeWithSVG } from './types';
 import './App.css';
-import { calculateCenter, downloadJson, downloadLonLat, downloadSvg, translateNodesToCSV } from './utils/lonLat';
+import { calculateCenter } from './utils/lonLat';
 import { TOKEN } from '../config';
 import { getPolygonGeometry } from './utils/polygon';
+import { downloadJson, downloadLonLat, downloadSvg, translateNodesToCSV } from './utils/download';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
