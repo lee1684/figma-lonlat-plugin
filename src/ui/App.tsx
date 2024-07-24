@@ -3,7 +3,7 @@ import MapComponent, { MapComponentHandle } from './component/Map';
 import FileUploader from './component/FileUploader';
 import { ExtractedNode, NodeWithSVG } from './types';
 import './App.css';
-import { downloadJson, downloadSvg, getPolygonGeometry } from './utils/lonLat';
+import { downloadJson, downloadLonLat, downloadSvg, getPolygonGeometry, translateNodesToCSV } from './utils/lonLat';
 import { TOKEN } from '../config';
 
 const App: React.FC = () => {
@@ -117,6 +117,12 @@ const App: React.FC = () => {
     downloadSvg(json, 'figma_svg');
   };
 
+  const handleDownloadLonLat = () => {
+    const center = mapRef.current?.getCenter();
+    const csv = translateNodesToCSV(nodes, center);
+    downloadLonLat(csv, 'lonlat.csv');
+  }
+
   const handleClearPolygons = () => {
     setNodes([]);
     if (fileInputRef.current) {
@@ -155,6 +161,14 @@ const App: React.FC = () => {
           disabled={nodes.length === 0}
         >
           JSON 다운로드
+        </button>
+        <button
+          type="button"
+          onClick={handleDownloadLonLat}
+          className="button"
+          disabled={nodes.length === 0}
+        >
+          위경도 좌표 다운로드
         </button>
         <button
           type="button"
