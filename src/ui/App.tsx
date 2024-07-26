@@ -7,6 +7,7 @@ import { calculateCenter } from './utils/lonLat';
 import { TOKEN } from '../config';
 import { getPolygonGeometry } from './utils/polygon';
 import { downloadJson, downloadLonLat, downloadSvg, translateNodesToCSV } from './utils/download';
+import HeaderButton from './component/HeaderButton';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
@@ -134,38 +135,26 @@ const App: React.FC = () => {
           onJsonUploaded={handleJsonUploaded}
           fileInputRef={fileInputRef}
         />
-        <button
-          type="button"
+        <HeaderButton
           onClick={handleDownloadSvg}
-          className="button"
           disabled={nodes.length === 0}
-        >
-          JSON 다운로드
-        </button>
-        <button
-          type="button"
+          label="JSON 다운로드"
+        />
+        <HeaderButton
           onClick={handleDownloadLonLat}
-          className="button"
           disabled={nodes.length === 0}
-        >
-          위경도 좌표 다운로드
-        </button>
-        <button
-          type="button"
+          label="위경도 좌표 다운로드"
+        />
+        <HeaderButton
           onClick={handleSendToFigma}
-          className="button"
           disabled={nodes.length === 0}
-        >
-          피그마로 보내기
-        </button>
-        <button
-          type="button"
+          label="피그마로 보내기"
+        />
+        <HeaderButton
           onClick={handleClearPolygons}
-          className="button"
           disabled={nodes.length === 0}
-        >
-          폴리곤 초기화
-        </button>
+          label="폴리곤 초기화"
+        />
       </div>
       <div className="mapContainer">
         <MapComponent ref={mapRef} nodes={nodes} />
