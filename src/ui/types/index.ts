@@ -1,3 +1,5 @@
+import { Coordinate } from "ol/coordinate";
+
 export type ExtractedNode = {
   id: string;
   name: string;
@@ -16,3 +18,13 @@ export type NodeWithSVG = {
 };
 
 export const CLIP_PATH_GROUP = 'Clip path group';
+
+export interface MapComponentProps {
+  nodes: ExtractedNode[];
+}
+
+export interface MapComponentHandle {
+  getPolygonCoordinates: () => number[][] | null;
+  getCenter: () => Coordinate | null;
+  setCenter: (newCenter: Coordinate) => void;
+}

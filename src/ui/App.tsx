@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import MapComponent, { MapComponentHandle } from './component/Map';
+import MapComponent from './component/Map';
 import FileUploader from './component/FileUploader';
-import { ExtractedNode, NodeWithSVG } from './types';
+import { ExtractedNode, MapComponentHandle, NodeWithSVG } from './types';
 import './App.css';
 import { calculateCenter } from './utils/lonLat';
 import { TOKEN } from '../config';
