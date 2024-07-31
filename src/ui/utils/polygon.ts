@@ -5,6 +5,21 @@ import { Coordinate } from 'ol/coordinate';
 import { ExtractedNode } from '../types';
 import { getLonLat } from './lonLat';
 
+export const calculateDistance = (point1: Coordinate, point2: Coordinate): number => {
+  const dx = point2[0] - point1[0];
+  const dy = point2[1] - point1[1];
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+export const getCornerCoordinates = (coordinates: Coordinate[]): Coordinate[] => {
+  const topLeft = coordinates[0];
+  const topRight = coordinates[1];
+  const bottomRight = coordinates[2];
+  const bottomLeft = coordinates[3];
+
+  return [topLeft, topRight, bottomRight, bottomLeft];
+};
+
 export const getPolygonGeometry = (polygonCoordinates: number[][]) => {
   const topLeft = polygonCoordinates[0];
   const topRight = polygonCoordinates[1];

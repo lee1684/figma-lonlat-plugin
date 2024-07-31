@@ -21,9 +21,10 @@ import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
 import { createPolygon } from '../utils/polygon';
 import { MapComponentHandle, MapComponentProps } from '../types';
+import { addSvgOverlay } from '../utils/svgOverlay';
 
 const MapComponent = (
-  { nodes }: MapComponentProps,
+  { nodes, svg }: MapComponentProps,
   ref: Ref<MapComponentHandle>,
 ) => {
   const mapElement = useRef<HTMLDivElement | null>(null);
@@ -44,9 +45,25 @@ const MapComponent = (
     });
   }
 
-  const updateZoomLevel = (map: Map) => {
+  const updateSvgOverlaySize = (map: Map, vectorLayer: VectorLayer<FeatureLike>) => {
+    map.getOverlays().clear();
+
+    setTimeout(() => {
+      const vectorSource = vectorLayer.getSource() as VectorSource;
+      const features = vectorSource.getFeatures();
+      features.forEach((feature) => {
+        const geometry = feature.getGeometry();
+        if (geometry instanceof Polygon) {
+          addSvgOverlay(mapRef.current, geometry, svg);
+        }
+      });
+    }, 0);
+  };
+
+  const handleZoomUpdate = (map: Map, vectorLayer: VectorLayer<FeatureLike>) => {
     map.getView().on('change:resolution', () => {
       currentZoomRef.current = map.getView().getZoom();
+      updateSvgOverlaySize(map, vectorLayer);
     });
   }
 
@@ -89,10 +106,10 @@ const MapComponent = (
 
     const map = createMap(tileLayer, vectorLayer);
 
-    addTranslateInteraction(map, vectorLayer);
-    addModifyInteraction(map, vectorSource);
+    addTranslateInteraction(map, vectorLayer, svg);
+    addModifyInteraction(map, vectorSource, svg);
     setCenterOnMapClick(map);
-    updateZoomLevel(map);
+    handleZoomUpdate(map, vectorLayer);
 
     mapElement.current.addEventListener('mousedown', handleMouseDown);
     mapElement.current.addEventListener('mouseup', handleMouseUp);
@@ -106,7 +123,7 @@ const MapComponent = (
         mapElement.current.removeEventListener('mouseup', handleMouseUp);
       }
     };
-  }, []);
+  }, [svg]);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -127,6 +144,7 @@ const MapComponent = (
     vectorSource.addFeatures(polygons);
     const extent = vectorSource.getExtent();
     setNewCenter(extent);
+    addSvgOverlay(mapRef.current, polygons[0].getGeometry(), svg);
   }, [center, nodes]);
 
   useImperativeHandle(ref, () => ({

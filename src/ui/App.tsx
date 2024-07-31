@@ -157,7 +157,7 @@ const App: React.FC = () => {
         />
       </div>
       <div className="mapContainer">
-        <MapComponent ref={mapRef} nodes={nodes} />
+        <MapComponent ref={mapRef} nodes={nodes} svg={svg} />
       </div>
       {loading && (
         <div className="loading-overlay">

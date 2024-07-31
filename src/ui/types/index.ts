@@ -21,6 +21,7 @@ export const CLIP_PATH_GROUP = 'Clip path group';
 
 export interface MapComponentProps {
   nodes: ExtractedNode[];
+  svg: Uint8Array,
 }
 
 export interface MapComponentHandle {
