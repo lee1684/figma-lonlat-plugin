@@ -29,3 +29,9 @@ export interface MapComponentHandle {
   getCenter: () => Coordinate | null;
   setCenter: (newCenter: Coordinate) => void;
 }
+
+export interface HeaderButtonProps {
+  onClick: () => void;
+  disabled: boolean;
+  label: string;
+}

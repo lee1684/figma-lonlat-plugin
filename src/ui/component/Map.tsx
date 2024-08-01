@@ -8,20 +8,18 @@ import React, {
 } from 'react';
 import Map from 'ol/Map';
 import View from 'ol/View';
-import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
+import { Tile as TileLayer } from 'ol/layer';
 import { OSM, Vector as VectorSource } from 'ol/source';
 import { fromLonLat, toLonLat } from 'ol/proj';
-import { Feature } from 'ol';
 import { Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
-import { FeatureLike } from 'ol/Feature';
 import { Extent } from 'ol/extent';
 import { createVectorLayer, getVectorLayer } from '../layers/vectorLayer';
 import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
 import { createPolygon } from '../utils/polygon';
 import { MapComponentHandle, MapComponentProps } from '../types';
-import { addSvgOverlay } from '../utils/svgOverlay';
+import { addSvgOverlay, updateSvgOverlaySize } from '../utils/svgOverlay';
 
 const MapComponent = (
   { nodes, svg }: MapComponentProps,
@@ -47,28 +45,12 @@ const MapComponent = (
   //   });
   // }
 
-  const updateSvgOverlaySize = (map: Map, vectorLayer: VectorLayer<FeatureLike>) => {
-    map.getOverlays().clear();
-
-    setTimeout(() => {
-      const vectorSource = vectorLayer.getSource() as VectorSource;
-      const features = vectorSource.getFeatures();
-      features.forEach((feature) => {
-        const geometry = feature.getGeometry();
-        if (geometry instanceof Polygon) {
-          addSvgOverlay(mapRef.current, geometry, svg);
-        }
-      });
-    }, 0);
-  };
-
   const handleZoomUpdate = (map: Map, isPolygonCtrlModified = false) => {
     const onChangeResolution = () => {
       if (isPolygonCtrlModified) {
         return;
       }
-      const vectorLayer = getVectorLayer(map);
-      updateSvgOverlaySize(map, vectorLayer);
+      updateSvgOverlaySize(map, svg);
     };
 
     if (resolutionChangeListenerRef.current) {
@@ -79,9 +61,12 @@ const MapComponent = (
     resolutionChangeListenerRef.current = onChangeResolution;
   };
 
-  const createMap = (tileLayer: TileLayer<OSM>, vectorLayer: VectorLayer<FeatureLike>) => {
+  const createMap = () => {
     return new Map({
-      layers: [tileLayer, vectorLayer],
+      layers: [
+        new TileLayer({ source: new OSM() }),
+        createVectorLayer(new VectorSource()),
+      ],
       target: mapElement.current,
       view: new View({
         center: fromLonLat(center),
@@ -89,9 +74,6 @@ const MapComponent = (
       }),
     });
   }
-
-  const handleMouseDown = () => setIsDragging(true);
-  const handleMouseUp = () => setIsDragging(false);
 
   const setNewCenter = (extent: Extent) => {
     if (!extent || extent[0] === extent[2] || extent[1] === extent[3]) {
@@ -109,20 +91,13 @@ const MapComponent = (
       return undefined;
     }
 
-    const tileLayer = new TileLayer({
-      source: new OSM(),
-    });
-
-    const vectorSource = new VectorSource();
-    const vectorLayer = createVectorLayer(vectorSource);
-
-    const map = createMap(tileLayer, vectorLayer);
-
-    addTranslateInteraction(map, svg);
-    addModifyInteraction(map, svg, setIsPolygonCtrlModified);
+    const map = createMap();
     // 중심점 설정 기능 주석 처리
     // setCenterOnMapClick(map);
     handleZoomUpdate(map);
+
+    const handleMouseDown = () => setIsDragging(true);
+    const handleMouseUp = () => setIsDragging(false);
 
     mapElement.current.addEventListener('mousedown', handleMouseDown);
     mapElement.current.addEventListener('mouseup', handleMouseUp);
@@ -136,8 +111,7 @@ const MapComponent = (
         mapElement.current.removeEventListener('mouseup', handleMouseUp);
       }
     };
-  }, [svg]);
-
+  }, []);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -153,10 +127,7 @@ const MapComponent = (
       return;
     }
 
-    const vectorLayer = mapRef.current
-      .getLayers()
-      .getArray()[1] as VectorLayer<Feature>;
-    const vectorSource = vectorLayer.getSource() as VectorSource;
+    const vectorSource = getVectorLayer(mapRef.current).getSource();
     vectorSource.clear();
 
     if (nodes.length <= 0) {
@@ -167,22 +138,22 @@ const MapComponent = (
     vectorSource.addFeatures(polygons);
     const extent = vectorSource.getExtent();
     setNewCenter(extent);
+    addTranslateInteraction(mapRef.current, svg);
+    addModifyInteraction(mapRef.current, svg, setIsPolygonCtrlModified);
+    handleZoomUpdate(mapRef.current);
     addSvgOverlay(mapRef.current, polygons[0].getGeometry(), svg);
-  }, [center, nodes]);
+  }, [center, nodes, svg]);
 
   useImperativeHandle(ref, () => ({
     getPolygonCoordinates: () => {
-      const vectorLayer = mapRef.current
-        ?.getLayers()
-        .getArray()[1] as VectorLayer<Feature>;
-      const vectorSource = vectorLayer.getSource() as VectorSource;
-      const feature = vectorSource.getFeatures()[0];
-      return (feature.getGeometry() as Polygon)
-        .getCoordinates()[0]
-        .map((coord) => toLonLat(coord));
+      const geometry = getVectorLayer(mapRef.current).getSource().getFeatures()[0].getGeometry();
+      if (geometry instanceof Polygon) {
+        return geometry.getCoordinates()[0].map((coord) => toLonLat(coord));
+      }
+      return null;
     },
     getCenter: () => center,
-    setCenter: (newCenter: [number, number]) => {
+    setCenter: (newCenter) => {
       setCenter(newCenter);
     },
   }));
