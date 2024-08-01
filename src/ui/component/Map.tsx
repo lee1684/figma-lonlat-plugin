@@ -16,7 +16,7 @@ import { Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import { FeatureLike } from 'ol/Feature';
 import { Extent } from 'ol/extent';
-import { createVectorLayer } from '../layers/vectorLayer';
+import { createVectorLayer, getVectorLayer } from '../layers/vectorLayer';
 import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
 import { createPolygon } from '../utils/polygon';
@@ -30,8 +30,10 @@ const MapComponent = (
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const currentZoomRef = useRef<number>(14);
+  const resolutionChangeListenerRef = useRef<() => void>(null);
   const [center, setCenter] = useState<Coordinate>([126.978, 37.5665]);
   const [isDragging, setIsDragging] = useState(false);
+  const [isPolygonCtrlModified, setIsPolygonCtrlModified] = useState(false);
 
   // 중심점 설정 기능 주석 처리
   // const setCenterOnMapClick = (map: Map) => {
@@ -61,12 +63,22 @@ const MapComponent = (
     }, 0);
   };
 
-  const handleZoomUpdate = (map: Map, vectorLayer: VectorLayer<FeatureLike>) => {
-    map.getView().on('change:resolution', () => {
-      currentZoomRef.current = map.getView().getZoom();
+  const handleZoomUpdate = (map: Map, isPolygonCtrlModified = false) => {
+    const onChangeResolution = () => {
+      if (isPolygonCtrlModified) {
+        return;
+      }
+      const vectorLayer = getVectorLayer(map);
       updateSvgOverlaySize(map, vectorLayer);
-    });
-  }
+    };
+
+    if (resolutionChangeListenerRef.current) {
+      map.getView().un('change:resolution', resolutionChangeListenerRef.current);
+    }
+
+    map.getView().on('change:resolution', onChangeResolution);
+    resolutionChangeListenerRef.current = onChangeResolution;
+  };
 
   const createMap = (tileLayer: TileLayer<OSM>, vectorLayer: VectorLayer<FeatureLike>) => {
     return new Map({
@@ -107,12 +119,11 @@ const MapComponent = (
 
     const map = createMap(tileLayer, vectorLayer);
 
-    addTranslateInteraction(map, vectorLayer, svg);
-    addModifyInteraction(map, vectorSource, svg);
-    setCenterOnMapClick(map);
+    addTranslateInteraction(map, svg);
+    addModifyInteraction(map, svg, setIsPolygonCtrlModified);
     // 중심점 설정 기능 주석 처리
     // setCenterOnMapClick(map);
-    handleZoomUpdate(map, vectorLayer);
+    handleZoomUpdate(map);
 
     mapElement.current.addEventListener('mousedown', handleMouseDown);
     mapElement.current.addEventListener('mouseup', handleMouseUp);
@@ -127,6 +138,16 @@ const MapComponent = (
       }
     };
   }, [svg]);
+
+
+  useEffect(() => {
+    if (!mapRef.current) {
+      return;
+    }
+    addTranslateInteraction(mapRef.current, svg, isPolygonCtrlModified);
+    addModifyInteraction(mapRef.current, svg, setIsPolygonCtrlModified, isPolygonCtrlModified);
+    handleZoomUpdate(mapRef.current, isPolygonCtrlModified);
+  }, [isPolygonCtrlModified]);
 
   useEffect(() => {
     if (!mapRef.current) {

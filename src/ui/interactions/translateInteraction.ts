@@ -1,17 +1,20 @@
 import { Map } from 'ol';
 import { Translate } from 'ol/interaction';
 import { primaryAction } from 'ol/events/condition';
-import { Vector as VectorLayer } from 'ol/layer';
-import { FeatureLike } from 'ol/Feature';
 import { TranslateEvent } from 'ol/interaction/Translate';
 import { Polygon } from 'ol/geom';
 import { addSvgOverlay } from '../utils/svgOverlay';
+import { getVectorLayer } from '../layers/vectorLayer';
+import { removeInteractions } from './removeInteraction';
 
 export const addTranslateInteraction = (
   map: Map,
-  vectorLayer: VectorLayer<FeatureLike>,
   svg: Uint8Array,
+  isCtrlPressed = false,
 ) => {
+  removeInteractions(map, 'Translate');
+
+  const vectorLayer = getVectorLayer(map);
   const translate = new Translate({
     condition: (event) => primaryAction(event),
     layers: [vectorLayer],
@@ -22,6 +25,9 @@ export const addTranslateInteraction = (
   });
 
   translate.on('translateend', (event: TranslateEvent) => {
+    if (isCtrlPressed) {
+      return;
+    }
     event.features.forEach((feature) => {
       const geometry = feature.getGeometry();
       if (geometry instanceof Polygon) {

@@ -5,6 +5,8 @@ import { Vector as VectorSource } from 'ol/source';
 import { getCenter } from 'ol/extent';
 import { ModifyEvent } from 'ol/interaction/Modify';
 import { addSvgOverlay } from '../utils/svgOverlay';
+import { getVectorLayer } from '../layers/vectorLayer';
+import { removeInteractions } from './removeInteraction';
 
 const calculateGeometryTransformation = (
   originalGeometry: Geometry,
@@ -31,8 +33,13 @@ const calculateGeometryTransformation = (
   return clonedGeometry;
 };
 
-const handleModifyStart = (event: ModifyEvent, map: Map) => {
+const handleModifyStart = (event: ModifyEvent, map: Map, setIsCtrlPressed: (isCtrlPressed: boolean) => void) => {
   map.getOverlays().clear();
+  const isCtrlPressed = event.mapBrowserEvent?.originalEvent?.ctrlKey;
+  if (isCtrlPressed) {
+    setIsCtrlPressed(isCtrlPressed);
+    return;
+  }
   event.features.forEach((feature) => {
     feature.set(
       'modifyGeometry',
@@ -42,7 +49,7 @@ const handleModifyStart = (event: ModifyEvent, map: Map) => {
   });
 };
 
-const handleModifyEnd = (event: ModifyEvent, map: Map, svg: Uint8Array) => {
+const handleModifyEnd = (event: ModifyEvent, map: Map, svg: Uint8Array, isCtrlPressed: boolean) => {
   event.features.forEach((feature) => {
     const modifyGeometry = feature.get('modifyGeometry');
     if (!modifyGeometry) {
@@ -51,6 +58,9 @@ const handleModifyEnd = (event: ModifyEvent, map: Map, svg: Uint8Array) => {
     feature.setGeometry(modifyGeometry.geometry);
     feature.unset('modifyGeometry', true);
 
+    if (isCtrlPressed) {
+      return;
+    }
     const geometry = feature.getGeometry();
     if (geometry instanceof Polygon) {
       addSvgOverlay(map, geometry, svg);
@@ -97,16 +107,20 @@ const modifyStyleFunction = (vectorSource: VectorSource<Feature<Geometry>>) => (
 
 export const addModifyInteraction = (
   map: Map,
-  vectorSource: VectorSource<Feature<Geometry>>,
   svg: Uint8Array,
+  setIsCtrlPressed: (isCtrlPressed: boolean) => void,
+  isCtrlPressed = false,
 ) => {
+  removeInteractions(map, 'Modify');
+
+  const vectorSource = getVectorLayer(map).getSource();
   const modify = new Modify({
     source: vectorSource,
     style: modifyStyleFunction(vectorSource),
   });
 
-  modify.on('modifystart', (event) => handleModifyStart(event, map));
-  modify.on('modifyend', (event) => handleModifyEnd(event, map, svg));
+  modify.on('modifystart', (event) => handleModifyStart(event, map, setIsCtrlPressed));
+  modify.on('modifyend', (event) => handleModifyEnd(event, map, svg, isCtrlPressed));
 
   map.addInteraction(modify);
 };

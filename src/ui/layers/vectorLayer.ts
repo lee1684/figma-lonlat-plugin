@@ -1,7 +1,19 @@
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
-import { Fill, Stroke, Style, Icon } from 'ol/style';
-import { FeatureLike } from 'ol/Feature';
+import { Fill, Stroke, Style } from 'ol/style';
+import Feature, { FeatureLike } from 'ol/Feature';
+import { Map } from 'ol';
+import { Geometry } from 'ol/geom';
+
+export const getVectorLayer = (map: Map): VectorLayer<Feature<Geometry>> | null => {
+  const layers = map.getLayers().getArray();
+  for (let i = 0; i < layers.length; i++) {
+    if (layers[i] instanceof VectorLayer) {
+      return layers[i] as VectorLayer<Feature<Geometry>>;
+    }
+  }
+  return null;
+};
 
 const frameStyle = new Style({
   geometry: (feature) => {

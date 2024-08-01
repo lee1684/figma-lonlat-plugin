@@ -54,7 +54,7 @@ const calculateCenter = (coordinates: number[][]): [number, number] => {
 };
 
 export const addSvgOverlay = (map: Map, geometry: Polygon, svg: Uint8Array): void => {
-  if (!geometry) return;
+  if (!geometry || !svg) return;
 
   const coordinates = geometry.getCoordinates()[0];
   const corners = getCornerCoordinates(coordinates);
