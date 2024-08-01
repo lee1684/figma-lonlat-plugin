@@ -1,13 +1,10 @@
 import { Coordinate } from 'ol/coordinate';
-import { ExtractedNode, NodeWithSVG } from '../types';
+import { ExtractedNode } from '../types';
 
-export const pixelToLonLat = (
-  x: number,
-  y: number,
-  center: Coordinate,
-): Coordinate => {
-  const scale = 0.000001;
-  return [center[0] + x * scale, center[1] - y * scale];
+const pixelToLonLat = (x: number, y: number, center: Coordinate) => {
+  const scaleX = 0.0000001;
+  const scaleY = 0.00000008;
+  return [center[0] + x * scaleX, center[1] - y * scaleY];
 };
 
 export const getLonLat = (
