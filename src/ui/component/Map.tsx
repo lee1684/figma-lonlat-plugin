@@ -29,7 +29,6 @@ const MapComponent = (
 ) => {
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
-  const currentZoomRef = useRef<number>(14);
   const resolutionChangeListenerRef = useRef<() => void>(null);
   const [center, setCenter] = useState<Coordinate>([126.978, 37.5665]);
   const [isDragging, setIsDragging] = useState(false);
@@ -86,7 +85,7 @@ const MapComponent = (
       target: mapElement.current,
       view: new View({
         center: fromLonLat(center),
-        zoom: currentZoomRef.current,
+        zoom: 19,
       }),
     });
   }
