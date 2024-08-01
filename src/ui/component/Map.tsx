@@ -33,17 +33,18 @@ const MapComponent = (
   const [center, setCenter] = useState<Coordinate>([126.978, 37.5665]);
   const [isDragging, setIsDragging] = useState(false);
 
-  const setCenterOnMapClick = (map: Map) => {
-    map.on('click', (event) => {
-      event.preventDefault();
-      const feature = map.forEachFeatureAtPixel(event.pixel, (feat) => feat);
-      if (feature) {
-        return;
-      }
-      const clickedCoordinate = toLonLat(map.getCoordinateFromPixel(event.pixel));
-      setCenter(clickedCoordinate);
-    });
-  }
+  // 중심점 설정 기능 주석 처리
+  // const setCenterOnMapClick = (map: Map) => {
+  //   map.on('click', (event) => {
+  //     event.preventDefault();
+  //     const feature = map.forEachFeatureAtPixel(event.pixel, (feat) => feat);
+  //     if (feature) {
+  //       return;
+  //     }
+  //     const clickedCoordinate = toLonLat(map.getCoordinateFromPixel(event.pixel));
+  //     setCenter(clickedCoordinate);
+  //   });
+  // }
 
   const updateSvgOverlaySize = (map: Map, vectorLayer: VectorLayer<FeatureLike>) => {
     map.getOverlays().clear();
@@ -109,6 +110,8 @@ const MapComponent = (
     addTranslateInteraction(map, vectorLayer, svg);
     addModifyInteraction(map, vectorSource, svg);
     setCenterOnMapClick(map);
+    // 중심점 설정 기능 주석 처리
+    // setCenterOnMapClick(map);
     handleZoomUpdate(map, vectorLayer);
 
     mapElement.current.addEventListener('mousedown', handleMouseDown);
@@ -167,7 +170,7 @@ const MapComponent = (
   return (
     <div
       ref={mapElement}
-      style={{ cursor: isDragging ? 'grabbing' : 'crosshair' }}
+      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
     />
   );
 };
