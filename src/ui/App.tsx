@@ -153,7 +153,7 @@ const App: React.FC = () => {
         <HeaderButton
           onClick={handleClearPolygons}
           disabled={nodes.length === 0}
-          label="폴리곤 초기화"
+          label="초기화"
         />
       </div>
       <div className="mapContainer">
