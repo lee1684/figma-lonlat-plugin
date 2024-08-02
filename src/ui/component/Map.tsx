@@ -135,6 +135,10 @@ const MapComponent = (
       return;
     }
 
+    if (svg) {
+      mapRef.current.getOverlays().clear();
+    }
+
     const polygons = createPolygon(nodes, center);
     vectorSource.addFeatures(polygons);
     const extent = vectorSource.getExtent();
