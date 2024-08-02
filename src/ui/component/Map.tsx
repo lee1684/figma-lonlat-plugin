@@ -131,6 +131,7 @@ const MapComponent = (
     vectorSource.clear();
 
     if (nodes.length <= 0) {
+      mapRef.current.getOverlays().clear();
       return;
     }
 
