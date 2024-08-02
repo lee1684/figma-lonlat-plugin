@@ -1,4 +1,5 @@
 import { Coordinate } from "ol/coordinate";
+import { RefObject } from "react";
 
 export type ExtractedNode = {
   id: string;
@@ -34,4 +35,9 @@ export interface HeaderButtonProps {
   onClick: () => void;
   disabled: boolean;
   label: string;
+}
+
+export interface FileUploaderButtonProps {
+  onJsonUploaded: (jsonString: string) => void;
+  fileInputRef: RefObject<HTMLInputElement>;
 }

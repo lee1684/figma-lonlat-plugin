@@ -1,11 +1,7 @@
-import React, { ChangeEvent, RefObject } from 'react';
+import React, { ChangeEvent } from 'react';
+import { FileUploaderButtonProps } from '../types';
 
-interface FileUploaderProps {
-  onJsonUploaded: (jsonString: string) => void;
-  fileInputRef: RefObject<HTMLInputElement>;
-}
-
-const FileUploader: React.FC<FileUploaderProps> = ({
+const FileUploaderButton: React.FC<FileUploaderButtonProps> = ({
   onJsonUploaded,
   fileInputRef,
 }) => {
@@ -26,4 +22,4 @@ const FileUploader: React.FC<FileUploaderProps> = ({
   return <input type="file" onChange={handleFileChange} ref={fileInputRef} />;
 };
 
-export default FileUploader;
+export default FileUploaderButton;

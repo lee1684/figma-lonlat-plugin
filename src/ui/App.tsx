@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import MapComponent from './component/Map';
-import FileUploader from './component/FileUploader';
+import FileUploaderButton from './component/FileUploaderButton';
 import { ExtractedNode, MapComponentHandle, NodeWithSVG } from './types';
 import './App.css';
 import { calculateCenter } from './utils/lonLat';
@@ -131,7 +131,7 @@ const App: React.FC = () => {
   return (
     <div className="container">
       <div className="header">
-        <FileUploader
+        <FileUploaderButton
           onJsonUploaded={handleJsonUploaded}
           fileInputRef={fileInputRef}
         />
