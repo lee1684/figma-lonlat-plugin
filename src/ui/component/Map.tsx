@@ -132,6 +132,11 @@ const MapComponent = (
       return false;
     });
   
+    if (!isInCorner) {
+      const isInFeature = geometry.intersectsCoordinate(mapRef.current.getCoordinateFromPixel(mousePosition));
+      setCursorStyle(isInFeature ? 'move' : 'grab');
+    }
+  
     setIsCursorInCorner(isInCorner);
   };
 
@@ -254,10 +259,9 @@ const MapComponent = (
     },
   }));
 
-  let cursor = 'grab';
-  if (isCursorInCorner) {
-    cursor = cursorStyle;
-  } else if (isDragging) {
+  let cursor = cursorStyle;
+  const isDraggingOutsideFeature = isDragging && !isCursorInCorner && cursorStyle !== 'move';
+  if (isDraggingOutsideFeature) {
     cursor = 'grabbing';
   }
 
