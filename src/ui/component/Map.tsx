@@ -15,6 +15,7 @@ import { Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Feature } from 'ol';
+import { defaults as defaultControls} from 'ol/control.js';
 import { createVectorLayer, getVectorLayer } from '../layers/vectorLayer';
 import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
@@ -122,6 +123,11 @@ const MapComponent = (
       view: new View({
         center: fromLonLat(center),
         zoom: 19,
+      }),
+      controls: defaultControls({
+        zoom: false,
+        rotate: false,
+        attribution: false,
       }),
     });
   }
