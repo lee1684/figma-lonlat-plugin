@@ -19,7 +19,7 @@ import { defaults as defaultControls} from 'ol/control.js';
 import { createVectorLayer, getVectorLayer } from '../layers/vectorLayer';
 import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
-import { createPolygon } from '../utils/polygon';
+import { calculateDistance, createPolygon, getCornerCoordinates } from '../utils/polygon';
 import { MapComponentHandle, MapComponentProps } from '../types';
 import { addSvgOverlay, updateSvgOverlaySize } from '../utils/svgOverlay';
 
@@ -34,6 +34,8 @@ const MapComponent = (
   const redoStack = useRef<Feature[]>([]);
   const [center, setCenter] = useState<Coordinate>([126.978, 37.5665]);
   const [isDragging, setIsDragging] = useState(false);
+  const [isCursorInCorner, setIsCursorInCorner] = useState(false);
+  const [cursorStyle, setCursorStyle] = useState('');
   const [isPolygonCtrlModified, setIsPolygonCtrlModified] = useState(false);
 
   // 중심점 설정 기능 주석 처리
@@ -111,6 +113,26 @@ const MapComponent = (
       handleRedo();
       event.preventDefault();
     }
+  };
+
+  const handleCursorChange = (event: MouseEvent, geometry: Polygon) => {
+    const mousePosition = mapRef.current.getEventPixel(event);
+    const cornerCoordinates = getCornerCoordinates(geometry.getCoordinates()[0]);
+  
+    const cursorStyles = ['nw-resize', 'ne-resize', 'se-resize', 'sw-resize']; // 좌상단, 우상단, 우하단, 좌하단
+  
+    const isInCorner = cornerCoordinates.some(([cornerX, cornerY], index) => {
+      const [cornerPixelX, cornerPixelY] = mapRef.current.getPixelFromCoordinate([cornerX, cornerY]);
+      const distance = calculateDistance([cornerPixelX, cornerPixelY], mousePosition);
+  
+      if (distance < 10) {
+        setCursorStyle(cursorStyles[index]);
+        return true;
+      }
+      return false;
+    });
+  
+    setIsCursorInCorner(isInCorner);
   };
 
   const createMap = () => {
@@ -205,6 +227,10 @@ const MapComponent = (
     }
 
     const polygons = createPolygon(nodes, center);
+    mapElement.current.addEventListener(
+      'mousemove',
+      (event) => handleCursorChange(event, polygons[0].getGeometry()),
+    );
     vectorSource.addFeatures(polygons);
     const extent = vectorSource.getExtent();
     setNewCenter(extent);
@@ -228,10 +254,17 @@ const MapComponent = (
     },
   }));
 
+  let cursor = 'grab';
+  if (isCursorInCorner) {
+    cursor = cursorStyle;
+  } else if (isDragging) {
+    cursor = 'grabbing';
+  }
+
   return (
     <div
       ref={mapElement}
-      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      style={{ cursor }}
     />
   );
 };
