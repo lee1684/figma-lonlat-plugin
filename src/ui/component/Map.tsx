@@ -14,6 +14,7 @@ import { fromLonLat, toLonLat } from 'ol/proj';
 import { Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
+import { Feature } from 'ol';
 import { createVectorLayer, getVectorLayer } from '../layers/vectorLayer';
 import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
@@ -28,6 +29,8 @@ const MapComponent = (
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const resolutionChangeListenerRef = useRef<() => void>(null);
+  const undoStack = useRef<Feature[]>([]);
+  const redoStack = useRef<Feature[]>([]);
   const [center, setCenter] = useState<Coordinate>([126.978, 37.5665]);
   const [isDragging, setIsDragging] = useState(false);
   const [isPolygonCtrlModified, setIsPolygonCtrlModified] = useState(false);
@@ -61,6 +64,54 @@ const MapComponent = (
     resolutionChangeListenerRef.current = onChangeResolution;
   };
 
+  const handleUndo = () => {
+    if (undoStack.current.length === 0 || !mapRef.current) return;
+
+    const lastPolygon = undoStack.current.pop();
+    if (!lastPolygon) return;
+
+    const vectorLayer = getVectorLayer(mapRef.current);
+    const currentPolygon = vectorLayer.getSource().getFeatures()[0];
+    redoStack.current.push(currentPolygon.clone());
+    vectorLayer.getSource().clear();
+    mapRef.current.getOverlays().clear();
+
+    vectorLayer.getSource().addFeature(lastPolygon);
+    const geometry = lastPolygon.getGeometry();
+    if (geometry instanceof Polygon) {
+      addSvgOverlay(mapRef.current, geometry, svg);
+    }
+  };
+
+  const handleRedo = () => {
+    if (redoStack.current.length === 0 || !mapRef.current) return;
+
+    const nextPolygon = redoStack.current.pop();
+    if (!nextPolygon) return;
+
+    const vectorLayer = getVectorLayer(mapRef.current);
+    const currentPolygon = vectorLayer.getSource().getFeatures()[0];
+    undoStack.current.push(currentPolygon.clone());
+    vectorLayer.getSource().clear();
+    mapRef.current.getOverlays().clear();
+
+    vectorLayer.getSource().addFeature(nextPolygon);
+    const geometry = nextPolygon.getGeometry();
+    if (geometry instanceof Polygon) {
+      addSvgOverlay(mapRef.current, geometry, svg);
+    }
+  }
+
+  const handleShortcut = (event: KeyboardEvent) => {
+    if (event.ctrlKey && event.key === 'z') {
+      handleUndo();
+      event.preventDefault();
+    } else if (event.ctrlKey && event.key === 'y') {
+      handleRedo();
+      event.preventDefault();
+    }
+  };
+
   const createMap = () => {
     return new Map({
       layers: [
@@ -85,6 +136,14 @@ const MapComponent = (
     const view = mapRef.current.getView();
     view.setCenter(fromLonLat(newCenter));
   }
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleShortcut);
+
+    return () => {
+      window.removeEventListener('keydown', handleShortcut);
+    };
+  }, [svg]);
 
   useEffect(() => {
     if (!mapElement.current) {
@@ -117,8 +176,8 @@ const MapComponent = (
     if (!mapRef.current) {
       return;
     }
-    addTranslateInteraction(mapRef.current, svg, isPolygonCtrlModified);
-    addModifyInteraction(mapRef.current, svg, setIsPolygonCtrlModified, isPolygonCtrlModified);
+    addTranslateInteraction(mapRef.current, svg, undoStack, redoStack, isPolygonCtrlModified);
+    addModifyInteraction(mapRef.current, svg, setIsPolygonCtrlModified, undoStack, redoStack, isPolygonCtrlModified);
     handleZoomUpdate(mapRef.current, isPolygonCtrlModified);
   }, [isPolygonCtrlModified]);
 
@@ -143,8 +202,8 @@ const MapComponent = (
     vectorSource.addFeatures(polygons);
     const extent = vectorSource.getExtent();
     setNewCenter(extent);
-    addTranslateInteraction(mapRef.current, svg);
-    addModifyInteraction(mapRef.current, svg, setIsPolygonCtrlModified);
+    addTranslateInteraction(mapRef.current, svg, undoStack, redoStack);
+    addModifyInteraction(mapRef.current, svg, setIsPolygonCtrlModified, undoStack, redoStack);
     handleZoomUpdate(mapRef.current);
     addSvgOverlay(mapRef.current, polygons[0].getGeometry(), svg);
   }, [center, nodes, svg]);

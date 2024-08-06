@@ -1,4 +1,4 @@
-import { Map } from 'ol';
+import { Feature, Map } from 'ol';
 import { Translate } from 'ol/interaction';
 import { primaryAction } from 'ol/events/condition';
 import { TranslateEvent } from 'ol/interaction/Translate';
@@ -10,6 +10,8 @@ import { removeInteractions } from './removeInteraction';
 export const addTranslateInteraction = (
   map: Map,
   svg: Uint8Array,
+  undoStack: React.MutableRefObject<Feature[]>,
+  redoStack: React.MutableRefObject<Feature[]>,
   isCtrlPressed = false,
 ) => {
   removeInteractions(map, 'Translate');
@@ -20,8 +22,13 @@ export const addTranslateInteraction = (
     layers: [vectorLayer],
   });
 
-  translate.on('translatestart', () => {
+  translate.on('translatestart', (event: TranslateEvent) => {
     map.getOverlays().clear();
+    event.features.forEach((feature) => {
+      undoStack.current.push(feature.clone());
+      // eslint-disable-next-line no-param-reassign
+      redoStack.current = [];
+    });
   });
 
   translate.on('translateend', (event: TranslateEvent) => {

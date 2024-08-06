@@ -33,7 +33,13 @@ const calculateGeometryTransformation = (
   return clonedGeometry;
 };
 
-const handleModifyStart = (event: ModifyEvent, map: Map, setIsCtrlPressed: (isCtrlPressed: boolean) => void) => {
+const handleModifyStart = (
+  event: ModifyEvent, 
+  map: Map, 
+  setIsCtrlPressed: (isCtrlPressed: boolean) => void,
+  undoStack: React.MutableRefObject<Feature[]>,
+  redoStack: React.MutableRefObject<Feature[]>,
+) => {
   map.getOverlays().clear();
   const isCtrlPressed = event.mapBrowserEvent?.originalEvent?.ctrlKey;
   if (isCtrlPressed) {
@@ -41,6 +47,9 @@ const handleModifyStart = (event: ModifyEvent, map: Map, setIsCtrlPressed: (isCt
     return;
   }
   event.features.forEach((feature) => {
+    undoStack.current.push(feature.clone());
+    // eslint-disable-next-line no-param-reassign
+    redoStack.current = [];
     feature.set(
       'modifyGeometry',
       { geometry: feature.getGeometry().clone() },
@@ -109,6 +118,8 @@ export const addModifyInteraction = (
   map: Map,
   svg: Uint8Array,
   setIsCtrlPressed: (isCtrlPressed: boolean) => void,
+  undoStack: React.MutableRefObject<Feature[]>,
+  redoStack: React.MutableRefObject<Feature[]>,
   isCtrlPressed = false,
 ) => {
   removeInteractions(map, 'Modify');
@@ -119,7 +130,7 @@ export const addModifyInteraction = (
     style: modifyStyleFunction(vectorSource),
   });
 
-  modify.on('modifystart', (event) => handleModifyStart(event, map, setIsCtrlPressed));
+  modify.on('modifystart', (event) => handleModifyStart(event, map, setIsCtrlPressed, undoStack, redoStack));
   modify.on('modifyend', (event) => handleModifyEnd(event, map, svg, isCtrlPressed));
 
   map.addInteraction(modify);
