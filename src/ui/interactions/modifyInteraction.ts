@@ -1,12 +1,14 @@
 import { Map, Feature } from 'ol';
 import { Modify } from 'ol/interaction';
 import { Geometry, Point, Polygon } from 'ol/geom';
-import { Vector as VectorSource } from 'ol/source';
 import { getCenter } from 'ol/extent';
 import { ModifyEvent } from 'ol/interaction/Modify';
+import { FeatureLike } from 'ol/Feature';
+import { Coordinate } from 'ol/coordinate';
 import { addSvgOverlay } from '../utils/svgOverlay';
 import { getVectorLayer } from '../layers/vectorLayer';
 import { removeInteractions } from './removeInteraction';
+import { calculateDistance } from '../utils/polygon';
 
 const calculateGeometryTransformation = (
   originalGeometry: Geometry,
@@ -77,10 +79,7 @@ const handleModifyEnd = (event: ModifyEvent, map: Map, svg: Uint8Array, isCtrlPr
   });
 };
 
-const modifyStyleFunction = (vectorSource: VectorSource<Feature<Geometry>>) => (
-  feature,
-  resolution,
-) => {
+const modifyStyleFunction = (feature: FeatureLike) => {
   feature.get('features').forEach((modifyFeature) => {
     const modifyGeometry = modifyFeature.get('modifyGeometry');
     if (!modifyGeometry) {
@@ -107,11 +106,27 @@ const modifyStyleFunction = (vectorSource: VectorSource<Feature<Geometry>>) => (
       modifyGeometry.geometry = transformedGeometry;
     }
   });
+};
 
-  const defaultStyle = new Modify({ source: vectorSource })
-    .getOverlay()
-    .getStyleFunction();
-  return defaultStyle(feature, resolution);
+const isCloseToCorner = (map: Map, coordinates: Coordinate[], pixel) => {
+  return coordinates.some(([x, y]) => {
+    const [px, py] = map.getPixelFromCoordinate([x, y]);
+    const distance = calculateDistance([px, py], pixel);
+    return distance < 10;
+  });
+};
+
+const modifyCondition = (event, map: Map) => {
+  const { pixel } = event;
+  const vectorLayer = getVectorLayer(event.map);
+  const geometry = vectorLayer.getSource().getFeatures()[0].getGeometry();
+  
+  if (!(geometry instanceof Polygon)) {
+    return false;
+  }
+
+  const coordinates = geometry.getCoordinates()[0];
+  return isCloseToCorner(map, coordinates, pixel);
 };
 
 export const addModifyInteraction = (
@@ -127,7 +142,8 @@ export const addModifyInteraction = (
   const vectorSource = getVectorLayer(map).getSource();
   const modify = new Modify({
     source: vectorSource,
-    style: modifyStyleFunction(vectorSource),
+    style: modifyStyleFunction,
+    condition: (event) => modifyCondition(event, map),
   });
 
   modify.on('modifystart', (event) => handleModifyStart(event, map, setIsCtrlPressed, undoStack, redoStack));
