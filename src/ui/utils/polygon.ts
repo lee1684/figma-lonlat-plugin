@@ -47,6 +47,35 @@ const findCoordinatesLayerNode = (
   return foundNode;
 };
 
+const extractCoordinatesFromLayer = (layerNode: ExtractedNode): Coordinate[] => {
+  const rawCoordinates = layerNode.children
+    .map((child) => child.name)
+    .map((childName) => {
+      const lonLat = childName.split(':')[1];
+      const lon = Number(lonLat.split(',')[0].trim());
+      const lat = Number(lonLat.split(',')[1].trim());
+      return [lon, lat];
+    });
+
+  rawCoordinates.push(rawCoordinates[0]);
+  return rawCoordinates.map((coord) => fromLonLat(coord));
+};
+
+const extractCoordinatesFromNode = (node: ExtractedNode, center: Coordinate): Coordinate[] => {
+  const { x, y, width, height, geometry } = node;
+
+  if (geometry) {
+    return geometry
+      .replace('POLYGON((', '')
+      .replace('))', '')
+      .split(',')
+      .map((coord) => coord.trim().split(' ').map(Number))
+      .map(([lon, lat]) => fromLonLat([lon, lat]));
+  }
+
+  return getLonLat(x, y, width, height, center).map((coord) => fromLonLat(coord));
+};
+
 export const createPolygon = (
   nodes: ExtractedNode[],
   center: Coordinate,
@@ -54,39 +83,12 @@ export const createPolygon = (
   if (!nodes || nodes.length === 0) return [];
 
   const coordinatesLayer = findCoordinatesLayerNode(nodes);
-  if (coordinatesLayer) {
-    const rawCoordinates = coordinatesLayer.children
-      .map((child) => child.name)
-      .map((childName) => {
-        const lonLat = childName.split(':')[1];
-        const lon = Number(lonLat.split(',')[0].trim());
-        const lat = Number(lonLat.split(',')[1].trim());
-        return [lon, lat];
-      });
-    rawCoordinates.push(rawCoordinates[0]);
-    const coordinates = rawCoordinates.map((coord) => fromLonLat(coord));
-
-    const polygon = new Polygon([coordinates]);
-    const feature = new Feature(polygon);
-
-    return [feature];
-  }
-
-  const node = nodes[0];
-  const { x, y, width, height, geometry } = node;
-
   let coordinates;
-  if (geometry) {
-    coordinates = geometry
-      .replace('POLYGON((', '')
-      .replace('))', '')
-      .split(',')
-      .map((coord) => coord.trim().split(' ').map(Number))
-      .map(([lon, lat]) => fromLonLat([lon, lat]));
+
+  if (coordinatesLayer) {
+    coordinates = extractCoordinatesFromLayer(coordinatesLayer);
   } else {
-    coordinates = getLonLat(x, y, width, height, center).map((coord) =>
-      fromLonLat(coord),
-    );
+    coordinates = extractCoordinatesFromNode(nodes[0], center);
   }
 
   const polygon = new Polygon([coordinates]);
