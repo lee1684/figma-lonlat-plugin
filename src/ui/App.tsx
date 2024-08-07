@@ -8,6 +8,7 @@ import { TOKEN } from '../config';
 import { getPolygonGeometry } from './utils/polygon';
 import { downloadJson, downloadLonLat, downloadSvg, translateNodesToCSV } from './utils/download';
 import HeaderButton from './component/HeaderButton';
+import LocationSearchButton from './component/LocationSearchButton';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
@@ -17,6 +18,7 @@ const App: React.FC = () => {
   const [svg, setSvg] = useState(null);
   const [fileKey, setFileKey] = useState('');
   const mapRef = useRef<MapComponentHandle>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-nodes' } }, '*');
@@ -29,6 +31,7 @@ const App: React.FC = () => {
         setSvg(svg);
         setFileKey(fileKey);
         setNodes(nodes);
+        inputRef.current.focus();
       } else if (type === 'hide-loading') {
         setLoading(false);
       }
@@ -154,6 +157,12 @@ const App: React.FC = () => {
           onClick={handleClearPolygons}
           disabled={nodes.length === 0}
           label="초기화"
+        />
+        <LocationSearchButton
+          mapRef={mapRef}
+          inputRef={inputRef}
+          nodes={nodes}
+          setLoading={setLoading}
         />
       </div>
       <div className="mapContainer">

@@ -41,3 +41,10 @@ export interface FileUploaderButtonProps {
   onJsonUploaded: (jsonString: string) => void;
   fileInputRef: RefObject<HTMLInputElement>;
 }
+
+export interface LocationSearchButtonProps {
+  mapRef: React.MutableRefObject<MapComponentHandle>;
+  inputRef: React.MutableRefObject<HTMLInputElement>;
+  nodes: ExtractedNode[];
+  setLoading: (loading: boolean) => void;
+}
