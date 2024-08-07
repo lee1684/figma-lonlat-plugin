@@ -87,6 +87,7 @@ export const createPolygon = (
 
   if (coordinatesLayer) {
     coordinates = extractCoordinatesFromLayer(coordinatesLayer);
+    nodes[0].children.splice(nodes[0].children.length - 1, 1);
   } else {
     coordinates = extractCoordinatesFromNode(nodes[0], center);
   }
