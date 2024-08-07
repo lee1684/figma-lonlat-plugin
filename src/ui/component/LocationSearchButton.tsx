@@ -20,6 +20,8 @@ const LocationSearchButton = ({ mapRef, inputRef, nodes, setLoading }: LocationS
     const query = inputRef.current.value;
     const location = await searchLocation(query);
     setLoading(false);
+    inputRef.current.value = '';
+    inputRef.current.focus();
     if (!location) {
       return;
     }
