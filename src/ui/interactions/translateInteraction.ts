@@ -26,7 +26,6 @@ export const addTranslateInteraction = (
     map.getOverlays().clear();
     event.features.forEach((feature) => {
       undoStack.current.push(feature.clone());
-      // eslint-disable-next-line no-param-reassign
       redoStack.current = [];
     });
   });

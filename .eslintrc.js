@@ -40,10 +40,7 @@ module.exports = {
     ],
     'no-restricted-globals': 'off',
     'react/jsx-props-no-spreading': 'off',
-    'no-param-reassign': [
-      'error',
-      { props: true, ignorePropertyModificationsForRegex: ['^draft'] },
-    ],
+    'no-param-reassign': 'off',
     'import/extensions': ['off'],
     'import/prefer-default-export': 'off',
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
