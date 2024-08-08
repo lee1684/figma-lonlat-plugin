@@ -47,6 +47,7 @@ const LocationSearchButton = ({ mapRef, inputRef, nodes, setLoading }: LocationS
         placeholder="위치를 입력하세요."
         onKeyDown={handleKeyDown}
         sx={{ mr: 2 }}
+        size='small'
       />
       <Button
         variant="contained"
