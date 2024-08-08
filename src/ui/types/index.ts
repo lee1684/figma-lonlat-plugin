@@ -47,4 +47,6 @@ export interface LocationSearchButtonProps {
   inputRef: React.MutableRefObject<HTMLInputElement>;
   nodes: ExtractedNode[];
   setLoading: (loading: boolean) => void;
+  searchQuery: string;
+  setSearchQuery: (searchQuery: string) => void;
 }

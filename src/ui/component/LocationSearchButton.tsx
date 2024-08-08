@@ -2,7 +2,14 @@ import React from 'react';
 import { Box, Button, TextField } from '@mui/material';
 import { LocationSearchButtonProps } from '../types';
 
-const LocationSearchButton = ({ mapRef, inputRef, nodes, setLoading }: LocationSearchButtonProps) => {
+const LocationSearchButton = ({
+  mapRef,
+  inputRef,
+  nodes,
+  setLoading,
+  searchQuery,
+  setSearchQuery,
+}: LocationSearchButtonProps) => {
   const searchLocation = async (query: string) => {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
@@ -21,6 +28,7 @@ const LocationSearchButton = ({ mapRef, inputRef, nodes, setLoading }: LocationS
     const query = inputRef.current.value;
     const location = await searchLocation(query);
     setLoading(false);
+    setSearchQuery('');
     inputRef.current.value = '';
     inputRef.current.focus();
     if (!location) {
@@ -33,7 +41,7 @@ const LocationSearchButton = ({ mapRef, inputRef, nodes, setLoading }: LocationS
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+    if (searchQuery.length > 0 && event.key === 'Enter') {
       handleSearch();
     }
   };
@@ -43,16 +51,18 @@ const LocationSearchButton = ({ mapRef, inputRef, nodes, setLoading }: LocationS
       <TextField
         disabled={nodes.length === 0}
         inputRef={inputRef}
+        value={searchQuery}
         variant="outlined"
         placeholder="위치를 입력하세요."
         onKeyDown={handleKeyDown}
+        onChange={(event) => setSearchQuery(event.target.value)}
         sx={{ mr: 2 }}
         size='small'
       />
       <Button
         variant="contained"
         onClick={handleSearch}
-        disabled={nodes.length === 0}
+        disabled={nodes.length === 0 || searchQuery.length === 0}
         sx={{
           backgroundColor: '#FFCC80',
           color: '#fff',

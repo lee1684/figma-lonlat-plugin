@@ -20,6 +20,7 @@ const App: React.FC = () => {
   const [fileKey, setFileKey] = useState('');
   const mapRef = useRef<MapComponentHandle>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: 'get-nodes' } }, '*');
@@ -153,7 +154,14 @@ const App: React.FC = () => {
         >
           초기화
         </Button>
-        <LocationSearchButton mapRef={mapRef} inputRef={inputRef} nodes={nodes} setLoading={setLoading} />
+        <LocationSearchButton
+          mapRef={mapRef}
+          inputRef={inputRef}
+          nodes={nodes}
+          setLoading={setLoading}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
       </Box>
       <Box sx={{ height: '490px', mb: 2, border: '2px solid #D3D3D3', borderRadius: '3px' }}>
         <MapComponent ref={mapRef} nodes={nodes} svg={svg} />
