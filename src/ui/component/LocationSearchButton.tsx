@@ -49,7 +49,6 @@ const LocationSearchButton = ({
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <TextField
-        disabled={nodes.length === 0}
         inputRef={inputRef}
         value={searchQuery}
         variant="outlined"
@@ -62,7 +61,7 @@ const LocationSearchButton = ({
       <Button
         variant="contained"
         onClick={handleSearch}
-        disabled={nodes.length === 0 || searchQuery.length === 0}
+        disabled={searchQuery.length === 0}
         sx={{
           backgroundColor: '#FFCC80',
           color: '#fff',
