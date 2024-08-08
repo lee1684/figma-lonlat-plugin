@@ -244,7 +244,24 @@ const MapComponent = (
     addModifyInteraction(mapRef.current, svg, setIsPolygonCtrlModified, undoStack, redoStack);
     handleZoomUpdate(mapRef.current);
     addSvgOverlay(mapRef.current, polygons[0].getGeometry(), svg);
-  }, [center, nodes, svg]);
+  }, [nodes, svg]);
+
+  useEffect(() => {
+    const vectorSource = getVectorLayer(mapRef.current).getSource();
+    vectorSource.clear();
+    mapRef.current.getOverlays().clear();
+
+    if (nodes.length > 0) {
+      const polygons = createPolygon(nodes, center);
+      vectorSource.addFeatures(polygons);
+      const extent = vectorSource.getExtent();
+      setNewCenter(extent);
+      addSvgOverlay(mapRef.current, polygons[0]?.getGeometry(), svg);
+      return;
+    }
+
+    mapRef.current.getView().setCenter(fromLonLat(center));
+  }, [center]);
 
   useImperativeHandle(ref, () => ({
     getPolygonCoordinates: () => {
