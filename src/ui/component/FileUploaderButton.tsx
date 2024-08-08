@@ -1,4 +1,5 @@
 import React, { ChangeEvent } from 'react';
+import { Button } from '@mui/material';
 import { FileUploaderButtonProps } from '../types';
 
 const FileUploaderButton: React.FC<FileUploaderButtonProps> = ({
@@ -19,7 +20,12 @@ const FileUploaderButton: React.FC<FileUploaderButtonProps> = ({
     }
   };
 
-  return <input type="file" onChange={handleFileChange} ref={fileInputRef} />;
+  return (
+    <Button variant="contained" component="label">
+      파일 업로드
+      <input type="file" hidden onChange={handleFileChange} ref={fileInputRef} />
+    </Button>
+  );
 };
 
 export default FileUploaderButton;

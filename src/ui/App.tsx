@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Box, Button, Container } from '@mui/material';
 import MapComponent from './component/Map';
 import FileUploaderButton from './component/FileUploaderButton';
 import { ExtractedNode, MapComponentHandle, NodeWithSVG } from './types';
-import './App.css';
 import { calculateCenter } from './utils/lonLat';
 import { TOKEN } from '../config';
 import { getPolygonGeometry } from './utils/polygon';
 import { downloadJson, downloadLonLat, downloadSvg, translateNodesToCSV } from './utils/download';
 import HeaderButton from './component/HeaderButton';
 import LocationSearchButton from './component/LocationSearchButton';
+import Spinner from './component/Spinner';
 
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
@@ -132,48 +133,33 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="container">
-      <div className="header">
-        <FileUploaderButton
-          onJsonUploaded={handleJsonUploaded}
-          fileInputRef={fileInputRef}
-        />
-        <HeaderButton
-          onClick={handleDownloadSvg}
-          disabled={nodes.length === 0}
-          label="JSON 다운로드"
-        />
-        <HeaderButton
-          onClick={handleDownloadLonLat}
-          disabled={nodes.length === 0}
-          label="위경도 좌표 다운로드"
-        />
-        <HeaderButton
-          onClick={handleSendToFigma}
-          disabled={nodes.length === 0}
-          label="피그마로 보내기"
-        />
-        <HeaderButton
+    <Container maxWidth='xl' sx={{ overflow: 'hidden' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', mb: 2, mt: 2 }}>
+        <FileUploaderButton onJsonUploaded={handleJsonUploaded} fileInputRef={fileInputRef} />
+        <HeaderButton onClick={handleDownloadSvg} disabled={nodes.length === 0} label="JSON 다운로드" />
+        <HeaderButton onClick={handleDownloadLonLat} disabled={nodes.length === 0} label="위경도 좌표 다운로드" />
+        <HeaderButton onClick={handleSendToFigma} disabled={nodes.length === 0} label="피그마로 보내기" />
+        <Button
+          variant="contained"
           onClick={handleClearPolygons}
           disabled={nodes.length === 0}
-          label="초기화"
-        />
-        <LocationSearchButton
-          mapRef={mapRef}
-          inputRef={inputRef}
-          nodes={nodes}
-          setLoading={setLoading}
-        />
-      </div>
-      <div className="mapContainer">
+          sx={{
+            backgroundColor: '#e57373',
+            color: '#fff',
+            '&:hover': {
+              backgroundColor: '#f44336',
+            },
+          }}
+        >
+          초기화
+        </Button>
+        <LocationSearchButton mapRef={mapRef} inputRef={inputRef} nodes={nodes} setLoading={setLoading} />
+      </Box>
+      <Box sx={{ height: '490px', mb: 2, border: '2px solid #D3D3D3', borderRadius: '3px' }}>
         <MapComponent ref={mapRef} nodes={nodes} svg={svg} />
-      </div>
-      {loading && (
-        <div className="loading-overlay">
-          <div className="spinner" />
-        </div>
-      )}
-    </div>
+      </Box>
+      {loading && <Spinner />}
+    </Container>
   );
 };
 

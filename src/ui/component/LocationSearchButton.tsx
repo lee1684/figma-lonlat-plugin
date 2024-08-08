@@ -1,4 +1,5 @@
 import React from 'react';
+import { Box, Button, TextField } from '@mui/material';
 import { LocationSearchButtonProps } from '../types';
 
 const LocationSearchButton = ({ mapRef, inputRef, nodes, setLoading }: LocationSearchButtonProps) => {
@@ -38,23 +39,31 @@ const LocationSearchButton = ({ mapRef, inputRef, nodes, setLoading }: LocationS
   };
 
   return (
-    <div className="search-container">
-      <input
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <TextField
         disabled={nodes.length === 0}
-        ref={inputRef}
-        className="search-input"
-        type="text"
+        inputRef={inputRef}
+        variant="outlined"
         placeholder="위치를 입력하세요."
         onKeyDown={handleKeyDown}
+        sx={{ mr: 2 }}
       />
-      <button
-        disabled={nodes.length === 0}
-        className="search-button"
-        type="button"
+      <Button
+        variant="contained"
         onClick={handleSearch}
-      >검색</button>
-    </div>
-  )
+        disabled={nodes.length === 0}
+        sx={{
+          backgroundColor: '#FFCC80',
+          color: '#fff',
+          '&:hover': {
+            backgroundColor: '#FFB74D',
+          },
+        }}
+      >
+        검색
+      </Button>
+    </Box>
+  );
 }
 
 export default LocationSearchButton;

@@ -16,6 +16,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Feature } from 'ol';
 import { defaults as defaultControls} from 'ol/control.js';
+import { Box } from '@mui/material';
 import { createVectorLayer, getVectorLayer } from '../layers/vectorLayer';
 import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
@@ -266,10 +267,7 @@ const MapComponent = (
   }
 
   return (
-    <div
-      ref={mapElement}
-      style={{ cursor }}
-    />
+    <Box ref={mapElement} sx={{ cursor }} />
   );
 };
 
