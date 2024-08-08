@@ -118,7 +118,7 @@ const isCloseToCorner = (map: Map, coordinates: Coordinate[], pixel) => {
 const modifyCondition = (event, map: Map) => {
   const { pixel } = event;
   const vectorLayer = getVectorLayer(event.map);
-  const geometry = vectorLayer.getSource().getFeatures()[0].getGeometry();
+  const geometry = vectorLayer.getSource().getFeatures()[0]?.getGeometry();
   
   if (!(geometry instanceof Polygon)) {
     return false;
