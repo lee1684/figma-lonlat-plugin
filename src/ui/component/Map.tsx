@@ -277,6 +277,13 @@ const MapComponent = (
       return;
     }
 
+    if (eventListenerRef.current) {
+      mapElement.current.removeEventListener('mousemove', eventListenerRef.current);
+    }
+
+    eventListenerRef.current = (event) => handleCursorChange(event, geometry);
+    mapElement.current.addEventListener('mousemove', eventListenerRef.current);
+
     const extent = geometry.getExtent();
     setNewCenter(extent);
     addSvgOverlay(mapRef.current, geometry, svg);
