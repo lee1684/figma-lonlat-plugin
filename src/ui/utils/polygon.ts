@@ -76,6 +76,16 @@ const extractCoordinatesFromNode = (node: ExtractedNode, center: Coordinate): Co
   return getLonLat(x, y, width, height, center).map((coord) => fromLonLat(coord));
 };
 
+export const updatePolygonCenter = (node: ExtractedNode, center: Coordinate): Feature<Polygon>[] => {
+  const { x, y, width, height } = node;
+  const coordinates = getLonLat(x, y, width, height, center).map((coord) => fromLonLat(coord));
+
+  const polygon = new Polygon([coordinates]);
+  const feature = new Feature(polygon);
+
+  return [feature];
+}
+
 export const createPolygon = (
   nodes: ExtractedNode[],
   center: Coordinate,

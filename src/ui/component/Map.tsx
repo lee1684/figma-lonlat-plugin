@@ -20,7 +20,7 @@ import { Box } from '@mui/material';
 import { createVectorLayer, getVectorLayer } from '../layers/vectorLayer';
 import { addModifyInteraction } from '../interactions/modifyInteraction';
 import { addTranslateInteraction } from '../interactions/translateInteraction';
-import { calculateDistance, createPolygon, getCornerCoordinates } from '../utils/polygon';
+import { calculateDistance, createPolygon, getCornerCoordinates, updatePolygonCenter } from '../utils/polygon';
 import { MapComponentHandle, MapComponentProps } from '../types';
 import { addSvgOverlay, updateSvgOverlaySize } from '../utils/svgOverlay';
 
@@ -247,20 +247,26 @@ const MapComponent = (
   }, [nodes, svg]);
 
   useEffect(() => {
+    if (nodes.length === 0) {
+      mapRef.current.getView().setCenter(fromLonLat(center));
+      return;
+    }
+
     const vectorSource = getVectorLayer(mapRef.current).getSource();
     vectorSource.clear();
     mapRef.current.getOverlays().clear();
 
-    if (nodes.length > 0) {
-      const polygons = createPolygon(nodes, center);
-      vectorSource.addFeatures(polygons);
-      const extent = vectorSource.getExtent();
-      setNewCenter(extent);
-      addSvgOverlay(mapRef.current, polygons[0]?.getGeometry(), svg);
+    const polygons = updatePolygonCenter(nodes[0], center);
+    vectorSource.addFeatures(polygons);
+
+    const geometry = polygons[0].getGeometry();
+    if (!(geometry instanceof Polygon)) {
       return;
     }
 
-    mapRef.current.getView().setCenter(fromLonLat(center));
+    const extent = geometry.getExtent();
+    setNewCenter(extent);
+    addSvgOverlay(mapRef.current, geometry, svg);
   }, [center]);
 
   useImperativeHandle(ref, () => ({
