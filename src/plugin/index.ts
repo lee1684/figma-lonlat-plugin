@@ -1,6 +1,6 @@
 import { CLIP_PATH_GROUP, ExtractedNode } from '../ui/types';
 
-figma.showUI(__html__, { width: 1500, height: 600 });
+figma.showUI(__html__, { width: 1250, height: 600 });
 
 const extractNodeAttributes = (node: SceneNode): ExtractedNode => {
   const extractedNode: ExtractedNode = {
