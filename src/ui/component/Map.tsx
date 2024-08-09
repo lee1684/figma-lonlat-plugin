@@ -33,6 +33,7 @@ const MapComponent = (
   const resolutionChangeListenerRef = useRef<() => void>(null);
   const undoStack = useRef<Feature[]>([]);
   const redoStack = useRef<Feature[]>([]);
+  const eventListenerRef = useRef<(event: MouseEvent) => void>();
   const [center, setCenter] = useState<Coordinate>([126.978, 37.5665]);
   const [isDragging, setIsDragging] = useState(false);
   const [isCursorInCorner, setIsCursorInCorner] = useState(false);
@@ -217,7 +218,7 @@ const MapComponent = (
 
   useEffect(() => {
     if (!mapRef.current) {
-      return;
+      return undefined;
     }
 
     const vectorSource = getVectorLayer(mapRef.current).getSource();
@@ -225,7 +226,7 @@ const MapComponent = (
 
     if (nodes.length <= 0) {
       mapRef.current.getOverlays().clear();
-      return;
+      return undefined;
     }
 
     if (svg) {
@@ -233,9 +234,15 @@ const MapComponent = (
     }
 
     const polygons = createPolygon(nodes, center);
+
+    if (eventListenerRef.current) {
+      mapElement.current.removeEventListener('mousemove', eventListenerRef.current);
+    }
+
+    eventListenerRef.current = (event) => handleCursorChange(event, polygons[0].getGeometry());
     mapElement.current.addEventListener(
       'mousemove',
-      (event) => handleCursorChange(event, polygons[0].getGeometry()),
+      eventListenerRef.current,
     );
     vectorSource.addFeatures(polygons);
     const extent = vectorSource.getExtent();
@@ -244,6 +251,12 @@ const MapComponent = (
     addModifyInteraction(mapRef.current, svg, setIsPolygonCtrlModified, undoStack, redoStack);
     handleZoomUpdate(mapRef.current);
     addSvgOverlay(mapRef.current, polygons[0].getGeometry(), svg);
+
+    return () => {
+      if (eventListenerRef.current) {
+        mapElement.current.removeEventListener('mousemove', eventListenerRef.current);
+      }
+    }
   }, [nodes, svg]);
 
   useEffect(() => {
