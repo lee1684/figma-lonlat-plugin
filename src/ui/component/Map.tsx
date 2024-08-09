@@ -58,6 +58,7 @@ const MapComponent = (
       if (isPolygonCtrlModified) {
         return;
       }
+      map.getOverlays().clear();
       updateSvgOverlaySize(map, svg);
     };
 

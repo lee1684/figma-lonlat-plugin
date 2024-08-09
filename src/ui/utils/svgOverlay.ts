@@ -2,6 +2,7 @@ import { Map, Overlay } from 'ol';
 import { Polygon } from 'ol/geom';
 import { calculateDistance, getCornerCoordinates } from './polygon';
 import { getVectorLayer } from '../layers/vectorLayer';
+import { debounce } from './debounce';
 
 const uint8ArrayToBase64 = (uint8Array: Uint8Array): string => {
   let binary = '';
@@ -78,11 +79,9 @@ export const addSvgOverlay = (map: Map, geometry: Polygon, svg: Uint8Array): voi
   map.addOverlay(overlay);
 };
 
-export const updateSvgOverlaySize = (map: Map, svg: Uint8Array) => {
-  map.getOverlays().clear();
-  const vectorLayer = getVectorLayer(map);
-
+export const updateSvgOverlaySize = debounce((map: Map, svg: Uint8Array) => {
   setTimeout(() => {
+    const vectorLayer = getVectorLayer(map);
     const features = vectorLayer.getSource().getFeatures();
     features.forEach((feature) => {
       const geometry = feature.getGeometry();
@@ -91,4 +90,4 @@ export const updateSvgOverlaySize = (map: Map, svg: Uint8Array) => {
       }
     });
   }, 0);
-};
+}, 30);
