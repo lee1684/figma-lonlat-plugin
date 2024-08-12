@@ -174,14 +174,6 @@ const MapComponent = (
   }
 
   useEffect(() => {
-    window.addEventListener('keydown', handleShortcut);
-
-    return () => {
-      window.removeEventListener('keydown', handleShortcut);
-    };
-  }, [svg]);
-
-  useEffect(() => {
     if (!mapElement.current) {
       return undefined;
     }
@@ -236,6 +228,7 @@ const MapComponent = (
 
     const polygons = createPolygon(nodes, center);
 
+    window.addEventListener('keydown', handleShortcut);
     if (eventListenerRef.current) {
       mapElement.current.removeEventListener('mousemove', eventListenerRef.current);
     }
@@ -254,6 +247,7 @@ const MapComponent = (
     addSvgOverlay(mapRef.current, polygons[0].getGeometry(), svg);
 
     return () => {
+      window.removeEventListener('keydown', handleShortcut);
       if (eventListenerRef.current) {
         mapElement.current.removeEventListener('mousemove', eventListenerRef.current);
       }
