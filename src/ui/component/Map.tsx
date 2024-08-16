@@ -259,7 +259,8 @@ const MapComponent = (
       mapRef.current.getView().setCenter(fromLonLat(center));
       return;
     }
-
+    undoStack.current = [];
+    redoStack.current = [];
     const vectorSource = getVectorLayer(mapRef.current).getSource();
     vectorSource.clear();
     mapRef.current.getOverlays().clear();
