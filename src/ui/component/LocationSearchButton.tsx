@@ -5,7 +5,6 @@ import { LocationSearchButtonProps } from '../types';
 const LocationSearchButton = ({
   mapRef,
   inputRef,
-  nodes,
   setLoading,
   searchQuery,
   setSearchQuery,

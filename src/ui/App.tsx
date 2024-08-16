@@ -157,7 +157,6 @@ const App: React.FC = () => {
         <LocationSearchButton
           mapRef={mapRef}
           inputRef={inputRef}
-          nodes={nodes}
           setLoading={setLoading}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}

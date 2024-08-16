@@ -45,7 +45,6 @@ export interface FileUploaderButtonProps {
 export interface LocationSearchButtonProps {
   mapRef: React.MutableRefObject<MapComponentHandle>;
   inputRef: React.MutableRefObject<HTMLInputElement>;
-  nodes: ExtractedNode[];
   setLoading: (loading: boolean) => void;
   searchQuery: string;
   setSearchQuery: (searchQuery: string) => void;
