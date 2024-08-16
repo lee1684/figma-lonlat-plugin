@@ -267,21 +267,16 @@ const MapComponent = (
     const polygons = updatePolygonCenter(nodes[0], center);
     vectorSource.addFeatures(polygons);
 
-    const geometry = polygons[0].getGeometry();
-    if (!(geometry instanceof Polygon)) {
-      return;
-    }
-
     if (eventListenerRef.current) {
       mapElement.current.removeEventListener('mousemove', eventListenerRef.current);
     }
 
-    eventListenerRef.current = (event) => handleCursorChange(event, geometry);
+    eventListenerRef.current = (event) => handleCursorChange(event, polygons[0].getGeometry());
     mapElement.current.addEventListener('mousemove', eventListenerRef.current);
 
-    const extent = geometry.getExtent();
+    const extent = vectorSource.getExtent();
     setNewCenter(extent);
-    addSvgOverlay(mapRef.current, geometry, svg);
+    addSvgOverlay(mapRef.current, polygons[0].getGeometry(), svg);
   }, [center]);
 
   useImperativeHandle(ref, () => ({
