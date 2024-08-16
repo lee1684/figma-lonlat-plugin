@@ -109,11 +109,14 @@ const MapComponent = (
   }
 
   const handleShortcut = (event: KeyboardEvent) => {
-    if (event.ctrlKey && event.key === 'z') {
-      handleUndo();
-      event.preventDefault();
-    } else if (event.ctrlKey && event.key === 'y') {
+    const isPressZKey = event.key.toLowerCase() === 'z';
+    if (event.ctrlKey && event.shiftKey && isPressZKey) {
       handleRedo();
+      event.preventDefault();
+      return;
+    }
+    if (event.ctrlKey && isPressZKey) {
+      handleUndo();
       event.preventDefault();
     }
   };
