@@ -14,7 +14,8 @@ import Spinner from './component/Spinner';
 const App: React.FC = () => {
   const [nodes, setNodes] = useState<ExtractedNode[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [loading, setLoading] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [nodesLoading, setNodesLoading] = useState(true);
   const [json, setJson] = useState(null);
   const [svg, setSvg] = useState(null);
   const [fileKey, setFileKey] = useState('');
@@ -33,9 +34,10 @@ const App: React.FC = () => {
         setSvg(svg);
         setFileKey(fileKey);
         setNodes(nodes);
+        setNodesLoading(false);
         inputRef.current.focus();
       } else if (type === 'hide-loading') {
-        setLoading(false);
+        setNodesLoading(false);
       }
     };
   }, []);
@@ -65,7 +67,7 @@ const App: React.FC = () => {
   };
 
   const handleDownloadJSON = async () => {
-    setLoading(true);
+    setSearchLoading(true);
     const nodeId = nodes[0].id;
     const response = await fetch(
       `https://api.figma.com/v1/files/${fileKey}/nodes?ids=${nodeId}&geometry=paths`,
@@ -76,7 +78,7 @@ const App: React.FC = () => {
       },
     );
     const data = await response.json();
-    setLoading(false);
+    setSearchLoading(false);
     const nodeData = data.nodes[nodeId].document;
     const polygonCoordinates = mapRef.current?.getPolygonCoordinates();
     nodeData.polygon = getPolygonGeometry(polygonCoordinates);
@@ -117,20 +119,22 @@ const App: React.FC = () => {
   };
 
   const handleSendToFigma = () => {
-    setLoading(true);
+    setNodesLoading(true);
 
     const coordinates = mapRef.current?.getPolygonCoordinates();
 
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: 'create-nodes',
-          coordinates,
-          svg,
+    requestAnimationFrame(() => {
+      parent.postMessage(
+        {
+          pluginMessage: {
+            type: 'create-nodes',
+            coordinates,
+            svg,
+          },
         },
-      },
-      '*',
-    );
+        '*',
+      );
+    })
   };
 
   return (
@@ -157,15 +161,16 @@ const App: React.FC = () => {
         <LocationSearchButton
           mapRef={mapRef}
           inputRef={inputRef}
-          setLoading={setLoading}
+          setLoading={setSearchLoading}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
         />
       </Box>
-      <Box sx={{ height: '490px', mb: 2, border: '2px solid #D3D3D3', borderRadius: '3px' }}>
+      <Box sx={{ height: '490px', mb: 2, border: '2px solid #D3D3D3', borderRadius: '3px', position: 'relative' }}>
         <MapComponent ref={mapRef} nodes={nodes} svg={svg} />
+        {searchLoading && <Spinner />}
       </Box>
-      {loading && <Spinner />}
+      {nodesLoading && <Spinner />}
     </Container>
   );
 };

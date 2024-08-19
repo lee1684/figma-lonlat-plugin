@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
+import '../css/spinner.css';
 
 
 const Spinner = () => {
@@ -10,14 +11,15 @@ const Spinner = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        position: 'fixed',
+        position: 'absolute',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+        backdropFilter: 'blur(3px)',
       }}>
-        <CircularProgress />
+      <div className="spinner" />
     </Box>
   )
 }
